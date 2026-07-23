@@ -1,0 +1,285 @@
+:root {
+  --ink: #14142b;
+  --ink-2: #1e1e40;
+  --violet: #7c6fee;
+  --violet-deep: #5b4fd1;
+  --mint: #37c871;
+  --mint-soft: #e4f9ec;
+  --teal: #2dd4bf;
+  --amber: #f5a623;
+  --rose: #f0576b;
+  --rose-soft: #fde8eb;
+  --canvas: #f5f5fa;
+  --card: #ffffff;
+  --line: #e7e7f1;
+  --text: #17172b;
+  --text-soft: #6c6c86;
+  --text-faint: #9c9cb4;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(20, 20, 43, 0.04), 0 8px 24px rgba(20, 20, 43, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: var(--canvas);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+}
+h1,
+h2,
+h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+p {
+  margin: 0;
+}
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------- Shared primitives used across components ---------- */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  border: 1px solid var(--line);
+}
+.card-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-soft);
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-head h3 {
+  font-size: 15.5px;
+}
+.eyebrow {
+  font-size: 11px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--violet);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.link-btn:hover {
+  text-decoration: underline;
+}
+
+.btn {
+  border: none;
+  border-radius: 9px;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    transform 0.1s ease,
+    background 0.15s ease;
+  white-space: nowrap;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--violet);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--violet-deep);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-soft);
+  border: 1px solid var(--line);
+}
+.btn-ghost:hover {
+  background: #fff;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.progress-track {
+  height: 6px;
+  border-radius: 20px;
+  background: var(--canvas);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 20px;
+}
+
+.text-faint {
+  color: var(--text-faint);
+}
+
+.empty {
+  text-align: center;
+  padding: 32px 0;
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+/* ---------- Transaction table, shared by Dashboard + Transactions views ---------- */
+table.txn-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.txn-table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  font-weight: 600;
+  padding: 0 10px 10px;
+  border-bottom: 1px dashed var(--line);
+}
+.txn-table td {
+  padding: 13px 10px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13.5px;
+  vertical-align: middle;
+}
+.txn-table tr:last-child td {
+  border-bottom: none;
+}
+
+.filter-row {
+  display: flex;
+  gap: 8px;
+}
+.filter-row button {
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-soft);
+  text-transform: capitalize;
+}
+.filter-row button.active {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.section-head h2 {
+  font-size: 20px;
+}
+.section-head p {
+  font-size: 12.5px;
+  color: var(--text-soft);
+  margin-top: 4px;
+}
+
+/* ---------- Form fields, shared by all modals ---------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+.field input,
+.field select,
+.field textarea {
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  font-size: 13.5px;
+  color: var(--text);
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--violet);
+}
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.field-error {
+  font-size: 12px;
+  color: var(--rose);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
