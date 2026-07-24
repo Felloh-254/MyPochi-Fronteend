@@ -1,10 +1,13 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { useUiStore } from '../stores/ui'
+import { useNotificationsStore } from '../stores/notifications'
 import Icon from './Icon.vue'
+import NotificationsPanel from './NotificationsPanel.vue'
 
 const route = useRoute()
 const ui = useUiStore()
+const notifications = useNotificationsStore()
 
 const todayLabel = new Date().toLocaleDateString('en-US', {
   weekday: 'long',
@@ -27,8 +30,13 @@ const todayLabel = new Date().toLocaleDateString('en-US', {
         <Icon name="search" size="15" />
         <input v-model="ui.searchQuery" placeholder="Search transactions" />
       </div>
+      <button class="bell-btn" @click="ui.notificationsPanelOpen = !ui.notificationsPanelOpen" aria-label="Notifications">
+        <Icon name="bell" size="17" />
+        <span v-if="notifications.count" class="bell-badge">{{ notifications.count }}</span>
+      </button>
       <button class="btn btn-primary" @click="ui.openTxnModal()">+ Add transaction</button>
     </div>
+    <NotificationsPanel v-if="ui.notificationsPanelOpen" />
   </header>
 </template>
 
@@ -42,6 +50,34 @@ const todayLabel = new Date().toLocaleDateString('en-US', {
   position: sticky;
   top: 0;
   z-index: 5;
+}
+.bell-btn {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 9px;
+  color: var(--text-soft);
+  display: flex;
+}
+.bell-btn:hover {
+  color: var(--text);
+}
+.bell-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--rose);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
 }
 .menu-toggle {
   display: none;

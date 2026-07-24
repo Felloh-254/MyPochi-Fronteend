@@ -6,6 +6,11 @@ export const useUiStore = defineStore('ui', {
     txnModalOpen: false,
     budgetModalOpen: false,
     accountModalOpen: false,
+    recurringModalOpen: false,
+    goalModalOpen: false,
+    contributeModalOpen: false,
+    contributeGoalId: null,
+    notificationsPanelOpen: false,
     searchQuery: '',
   }),
   actions: {
@@ -17,6 +22,16 @@ export const useUiStore = defineStore('ui', {
     },
     openAccountModal() {
       this.accountModalOpen = true
+    },
+    openRecurringModal() {
+      this.recurringModalOpen = true
+    },
+    openGoalModal() {
+      this.goalModalOpen = true
+    },
+    openContributeModal(goalId) {
+      this.contributeGoalId = goalId
+      this.contributeModalOpen = true
     },
   },
 })

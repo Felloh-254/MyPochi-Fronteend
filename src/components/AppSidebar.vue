@@ -13,7 +13,12 @@ const navItems = [
   { to: '/', label: 'Dashboard', icon: 'dashboard' },
   { to: '/accounts', label: 'Accounts', icon: 'wallet' },
   { to: '/budgets', label: 'Budgets', icon: 'budgets' },
+  { to: '/recurring', label: 'Recurring', icon: 'repeat' },
+  { to: '/goals', label: 'Goals', icon: 'target' },
   { to: '/transactions', label: 'Transactions', icon: 'transactions' },
+  { to: '/insights', label: 'Insights', icon: 'trending' },
+  { to: '/reports', label: 'Reports', icon: 'fileText' },
+  { to: '/import', label: 'Import', icon: 'upload' },
   { to: '/settings', label: 'Settings', icon: 'settings' },
 ]
 </script>
@@ -21,7 +26,7 @@ const navItems = [
 <template>
   <aside class="sidebar">
     <div class="brand">
-      <img :src="logo" alt="Coffer logo" class="brand-mark" />
+      <img :src="logo" alt="MyPochi logo" class="brand-mark" />
       <div class="brand-text">
         <span class="brand-name">MyPochi</span>
         <span class="brand-tag">Money, mapped</span>
@@ -100,6 +105,8 @@ const navItems = [
   flex-direction: column;
   gap: 2px;
   margin-top: 8px;
+  overflow-y: auto;
+  min-height: 0;
 }
 .nav-item {
   display: flex;

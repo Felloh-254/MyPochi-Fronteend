@@ -3,8 +3,8 @@ import { api } from '../services/api'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: localStorage.getItem('coffer_token') || null,
-    user: JSON.parse(localStorage.getItem('coffer_user') || 'null'),
+    token: localStorage.getItem('mypochi_token') || null,
+    user: JSON.parse(localStorage.getItem('mypochi_user') || 'null'),
     loading: false,
     error: null,
   }),
@@ -54,15 +54,15 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.token = null
       this.user = null
-      localStorage.removeItem('coffer_token')
-      localStorage.removeItem('coffer_user')
+      localStorage.removeItem('mypochi_token')
+      localStorage.removeItem('mypochi_user')
     },
 
     _setSession(data) {
       this.token = data.token
       this.user = data.user
-      localStorage.setItem('coffer_token', data.token)
-      localStorage.setItem('coffer_user', JSON.stringify(data.user))
+      localStorage.setItem('mypochi_token', data.token)
+      localStorage.setItem('mypochi_user', JSON.stringify(data.user))
     },
   },
 })

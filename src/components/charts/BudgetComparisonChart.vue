@@ -1,34 +1,29 @@
 <script setup>
 import { computed } from 'vue'
-import { Line } from 'vue-chartjs'
-import { formatMonth } from '../../utils/format'
+import { Bar } from 'vue-chartjs'
+import { formatPeriodShort } from '../../utils/period'
 
 const props = defineProps({
-  monthlyData: { type: Array, required: true },
+  history: { type: Array, required: true }, // [{ period, budgeted, spent }]
 })
 
 const chartData = computed(() => ({
-  labels: props.monthlyData.map((m) => formatMonth(m.month)),
+  labels: props.history.map((h) => formatPeriodShort(h.period)),
   datasets: [
     {
-      label: 'Income',
-      data: props.monthlyData.map((m) => m.income),
-      borderColor: '#37C871',
-      backgroundColor: 'rgba(55,200,113,.08)',
-      tension: 0.35,
-      fill: true,
-      pointRadius: 3,
-      pointBackgroundColor: '#37C871',
+      label: 'Budgeted',
+      data: props.history.map((h) => h.budgeted),
+      backgroundColor: '#E4E1FC',
+      borderRadius: 4,
     },
     {
-      label: 'Expenses',
-      data: props.monthlyData.map((m) => m.expense),
-      borderColor: '#7C6FEE',
-      backgroundColor: 'rgba(124,111,238,.08)',
-      tension: 0.35,
-      fill: true,
-      pointRadius: 3,
-      pointBackgroundColor: '#7C6FEE',
+      label: 'Spent',
+      data: props.history.map((h) => h.spent),
+      backgroundColor: (ctx) => {
+        const h = props.history[ctx.dataIndex]
+        return h && h.spent > h.budgeted ? '#F0576B' : '#7C6FEE'
+      },
+      borderRadius: 4,
     },
   ],
 }))
@@ -57,6 +52,6 @@ const chartOptions = {
 
 <template>
   <div style="height: 220px">
-    <Line :data="chartData" :options="chartOptions" />
+    <Bar :data="chartData" :options="chartOptions" />
   </div>
 </template>

@@ -34,7 +34,7 @@ function toggleMode() {
   <div class="auth-screen">
     <div class="auth-card">
       <div class="auth-brand">
-        <img :src="logo" alt="Coffer logo" />
+        <img :src="logo" alt="MyPochi logo" />
         <div>
           <div class="brand-name">MyPochi</div>
           <div class="brand-tag">Money, mapped</div>

@@ -3,6 +3,7 @@ import {
   LineElement,
   PointElement,
   ArcElement,
+  BarElement,
   CategoryScale,
   LinearScale,
   Filler,
@@ -10,4 +11,4 @@ import {
   Tooltip,
 } from 'chart.js'
 
-ChartJS.register(LineElement, PointElement, ArcElement, CategoryScale, LinearScale, Filler, Legend, Tooltip)
+ChartJS.register(LineElement, PointElement, ArcElement, BarElement, CategoryScale, LinearScale, Filler, Legend, Tooltip)

@@ -31,7 +31,7 @@ function signOut() {
     </div>
 
     <div class="card">
-      <div class="settings-row"><span class="label">Currency</span><span>USD ($)</span></div>
+      <div class="settings-row"><span class="label">Currency</span><span>KES (Ksh)</span></div>
       <div class="settings-row">
         <span class="label">Member since</span>
         <span>{{ auth.user?.created_at ? new Date(auth.user.created_at).toLocaleDateString() : '—' }}</span>

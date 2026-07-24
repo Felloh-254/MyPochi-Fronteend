@@ -11,9 +11,9 @@ const ui = useUiStore()
 
 <template>
   <div v-if="auth.isAuthenticated" class="app-shell" :class="{ 'nav-open': ui.mobileNavOpen }">
-    <AppSidebar />
+    <AppSidebar class="no-print" />
     <div class="main">
-      <AppTopbar />
+      <AppTopbar class="no-print" />
       <main class="content">
         <router-view />
       </main>

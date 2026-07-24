@@ -283,3 +283,17 @@ table.txn-table {
   gap: 10px;
   margin-top: 6px;
 }
+
+/* ---------- Print (used by the Reports view "Save as PDF" flow) ---------- */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .printable {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

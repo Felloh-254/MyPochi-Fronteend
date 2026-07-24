@@ -27,10 +27,40 @@ const routes = [
     meta: { title: 'Budgets', requiresAuth: true },
   },
   {
+    path: '/recurring',
+    name: 'recurring',
+    component: () => import('../views/RecurringView.vue'),
+    meta: { title: 'Recurring', requiresAuth: true },
+  },
+  {
+    path: '/goals',
+    name: 'goals',
+    component: () => import('../views/GoalsView.vue'),
+    meta: { title: 'Goals', requiresAuth: true },
+  },
+  {
     path: '/transactions',
     name: 'transactions',
     component: () => import('../views/TransactionsView.vue'),
     meta: { title: 'Transactions', requiresAuth: true },
+  },
+  {
+    path: '/insights',
+    name: 'insights',
+    component: () => import('../views/InsightsView.vue'),
+    meta: { title: 'Insights', requiresAuth: true },
+  },
+  {
+    path: '/reports',
+    name: 'reports',
+    component: () => import('../views/ReportsView.vue'),
+    meta: { title: 'Reports', requiresAuth: true },
+  },
+  {
+    path: '/import',
+    name: 'import',
+    component: () => import('../views/ImportView.vue'),
+    meta: { title: 'Import', requiresAuth: true },
   },
   {
     path: '/settings',

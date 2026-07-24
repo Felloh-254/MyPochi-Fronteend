@@ -2,15 +2,26 @@
 import { onMounted } from 'vue'
 import { useBudgetsStore } from '../stores/budgets'
 import { useUiStore } from '../stores/ui'
+import { formatPeriodLabel, shiftPeriod, isCurrentPeriod } from '../utils/period'
 import BudgetCard from '../components/BudgetCard.vue'
 import NewBudgetModal from '../components/NewBudgetModal.vue'
+import BudgetComparisonChart from '../components/charts/BudgetComparisonChart.vue'
+import Icon from '../components/Icon.vue'
 
 const budgetsStore = useBudgetsStore()
 const ui = useUiStore()
 
 onMounted(() => {
-  if (budgetsStore.items.length === 0) budgetsStore.fetch()
+  budgetsStore.fetch(budgetsStore.period)
+  budgetsStore.fetchHistory(6)
 })
+
+function goToPreviousMonth() {
+  budgetsStore.fetch(shiftPeriod(budgetsStore.period, -1))
+}
+function goToNextMonth() {
+  budgetsStore.fetch(shiftPeriod(budgetsStore.period, 1))
+}
 
 function handleDelete(id) {
   budgetsStore.remove(id)
@@ -31,13 +42,38 @@ function handleDelete(id) {
       <button class="btn btn-primary" @click="ui.openBudgetModal()">+ New budget</button>
     </div>
 
-    <div class="budget-grid">
+    <div class="period-switcher">
+      <button class="period-arrow" @click="goToPreviousMonth" aria-label="Previous month">
+        <Icon name="chevronLeft" size="16" />
+      </button>
+      <span class="period-label">
+        {{ formatPeriodLabel(budgetsStore.period) }}
+        <span v-if="isCurrentPeriod(budgetsStore.period)" class="period-tag">Current</span>
+      </span>
+      <button class="period-arrow" @click="goToNextMonth" aria-label="Next month">
+        <Icon name="chevronRight" size="16" />
+      </button>
+    </div>
+
+    <div v-if="!budgetsStore.loading && budgetsStore.items.length === 0" class="card empty-period">
+      <p>No budgets for {{ formatPeriodLabel(budgetsStore.period) }} yet.</p>
+      <div class="empty-period-actions">
+        <button class="btn btn-ghost" @click="budgetsStore.copyFromPreviousMonth()">Copy last month's budgets</button>
+        <button class="btn btn-primary" @click="ui.openBudgetModal()">+ New budget</button>
+      </div>
+    </div>
+
+    <div class="budget-grid" v-else>
       <BudgetCard v-for="b in budgetsStore.items" :key="b.id" :budget="b" @delete="handleDelete" />
     </div>
 
-    <p v-if="!budgetsStore.loading && budgetsStore.items.length === 0" class="empty">
-      No budgets yet. Create one to start tracking spend by category.
-    </p>
+    <div class="card">
+      <div class="card-head">
+        <h3>Monthly comparison</h3>
+        <span class="eyebrow">Budgeted vs. spent, last 6 months</span>
+      </div>
+      <BudgetComparisonChart :history="budgetsStore.history" />
+    </div>
   </div>
 
   <NewBudgetModal v-if="ui.budgetModalOpen" />
@@ -57,6 +93,60 @@ function handleDelete(id) {
   font-size: 12.5px;
   padding: 10px 14px;
   border-radius: 9px;
+}
+.period-switcher {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 8px;
+}
+.period-arrow {
+  background: none;
+  border: none;
+  color: var(--text-soft);
+  padding: 6px;
+  border-radius: 7px;
+  display: flex;
+}
+.period-arrow:hover {
+  background: var(--canvas);
+  color: var(--text);
+}
+.period-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  min-width: 140px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.period-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--mint);
+  background: var(--mint-soft);
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+.empty-period {
+  text-align: center;
+  padding: 40px 24px;
+  color: var(--text-soft);
+  font-size: 13.5px;
+}
+.empty-period-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
 }
 .budget-grid {
   display: grid;
