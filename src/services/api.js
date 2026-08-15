@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+const BASE_URL = import.meta.env.VITE_API_URL
 
 export class ApiError extends Error {
   constructor(message, status) {
@@ -11,7 +11,7 @@ export class ApiError extends Error {
 async function request(path, { method = 'GET', body, auth = true } = {}) {
   const headers = { 'Content-Type': 'application/json' }
   if (auth) {
-    const token = localStorage.getItem('coffer_token')
+    const token = localStorage.getItem('mypochi_token')
     if (token) headers.Authorization = `Bearer ${token}`
   }
 

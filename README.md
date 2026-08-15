@@ -52,7 +52,7 @@ src/
 
 ```bash
 npm install
-cp .env.example .env      # point VITE_API_URL at your running Go backend
+cp .env      # point VITE_API_URL at your running backend
 npm run dev
 ```
 
