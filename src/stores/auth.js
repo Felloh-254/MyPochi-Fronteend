@@ -51,11 +51,20 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    logout() {
+    clearSession(message = null) {
       this.token = null
       this.user = null
+      this.error = message
       localStorage.removeItem('mypochi_token')
       localStorage.removeItem('mypochi_user')
+    },
+
+    logout() {
+      this.clearSession()
+    },
+
+    handleUnauthorized(message = 'Your session has expired. Please sign in again.') {
+      this.clearSession(message)
     },
 
     _setSession(data) {

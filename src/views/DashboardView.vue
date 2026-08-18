@@ -37,10 +37,6 @@ function accountName(accountId) {
 
 <template>
   <div class="view">
-    <p v-if="budgetsStore.isDemo || transactionsStore.isDemo || accountsStore.isDemo" class="demo-banner">
-      Showing demo data — couldn't reach the API. Set <code>VITE_API_URL</code> and make sure the backend is running.
-    </p>
-
     <div class="hero-row">
       <StatCard
         variant="hero"

@@ -1,4 +1,6 @@
 <script setup>
+import { onBeforeUnmount, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import { useUiStore } from './stores/ui'
 import AppSidebar from './components/AppSidebar.vue'
@@ -7,6 +9,24 @@ import AddTransactionModal from './components/AddTransactionModal.vue'
 
 const auth = useAuthStore()
 const ui = useUiStore()
+const router = useRouter()
+
+const handleUnauthorized = (event) => {
+  const message = event.detail?.message || 'Your session has expired. Please sign in again.'
+  auth.handleUnauthorized(message)
+
+  if (router.currentRoute.value.name !== 'unauthorized') {
+    router.replace({ name: 'unauthorized' })
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('auth:unauthorized', handleUnauthorized)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('auth:unauthorized', handleUnauthorized)
+})
 </script>
 
 <template>

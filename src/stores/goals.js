@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-import { api } from '../services/api'
-import { DEMO_GOALS } from '../services/demoData'
+import { api, ApiError } from '../services/api'
 import { useTransactionsStore } from './transactions'
 
 export const useGoalsStore = defineStore('goals', {
@@ -8,7 +7,6 @@ export const useGoalsStore = defineStore('goals', {
     items: [],
     loading: false,
     error: null,
-    isDemo: false,
   }),
 
   actions: {
@@ -19,8 +17,12 @@ export const useGoalsStore = defineStore('goals', {
         this.items = await api.getGoals()
         this.isDemo = false
       } catch (e) {
-        this.items = DEMO_GOALS
-        this.isDemo = true
+        if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+          this.items = []
+          this.error = e.message
+          throw e
+        }
+        this.items = []
         this.error = e.message
       } finally {
         this.loading = false
@@ -28,18 +30,13 @@ export const useGoalsStore = defineStore('goals', {
     },
 
     async create(payload) {
-      if (this.isDemo) {
-        const local = { id: Date.now(), current_amount: 0, ...payload }
-        this.items.push(local)
-        return local
-      }
       const created = await api.createGoal(payload)
       this.items.push(created)
       return created
     },
 
     async remove(id) {
-      if (!this.isDemo) await api.deleteGoal(id)
+      await api.deleteGoal(id)
       this.items = this.items.filter((g) => g.id !== id)
     },
 
@@ -64,10 +61,6 @@ export const useGoalsStore = defineStore('goals', {
         })
       }
 
-      if (this.isDemo) {
-        goal.current_amount += amount
-        return goal
-      }
       const updated = await api.contributeToGoal(id, { amount })
       const idx = this.items.findIndex((g) => g.id === id)
       if (idx > -1) this.items[idx] = updated

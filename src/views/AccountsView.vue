@@ -22,10 +22,6 @@ function handleDelete(id) {
 
 <template>
   <div class="view">
-    <p v-if="accountsStore.isDemo" class="demo-banner">
-      Showing demo data — changes here won't persist until the API is reachable.
-    </p>
-
     <div class="section-head">
       <div>
         <h2>Accounts</h2>

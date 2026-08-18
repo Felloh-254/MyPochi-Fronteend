@@ -10,7 +10,7 @@ const auth = useAuthStore()
 const ui = useUiStore()
 
 const navItems = [
-  { to: '/', label: 'Dashboard', icon: 'dashboard' },
+  { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { to: '/accounts', label: 'Accounts', icon: 'wallet' },
   { to: '/budgets', label: 'Budgets', icon: 'budgets' },
   { to: '/recurring', label: 'Recurring', icon: 'repeat' },

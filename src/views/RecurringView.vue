@@ -22,10 +22,6 @@ function accountName(accountId) {
 
 <template>
   <div class="view">
-    <p v-if="recurringStore.isDemo" class="demo-banner">
-      Showing demo data — changes here won't persist until the API is reachable.
-    </p>
-
     <div class="section-head">
       <div>
         <h2>Recurring</h2>

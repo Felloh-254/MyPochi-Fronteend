@@ -18,7 +18,7 @@ async function submit() {
     } else {
       await auth.register(form.email, form.password, form.name)
     }
-    router.push(route.query.redirect || '/')
+    router.push(route.query.redirect || '/dashboard')
   } catch (e) {
     // error message is already surfaced from auth.error
   }

@@ -9,10 +9,17 @@ const routes = [
     meta: { title: 'Sign in' },
   },
   {
-    path: '/',
+    path: '/unauthorized',
+    name: 'unauthorized',
+    component: () => import('../views/UnauthorizedView.vue'),
+    meta: { title: 'Unauthorized' },
+  },
+  {
+    path: '/dashboard',
     name: 'dashboard',
     component: () => import('../views/DashboardView.vue'),
     meta: { title: 'Dashboard', requiresAuth: true },
+    alias: '/',
   },
   {
     path: '/accounts',
@@ -78,9 +85,14 @@ const router = createRouter({
 router.beforeEach((to) => {
   const auth = useAuthStore()
 
+  if (to.name === 'unauthorized') {
+    return true
+  }
+
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
+
   if (to.name === 'login' && auth.isAuthenticated) {
     return { name: 'dashboard' }
   }

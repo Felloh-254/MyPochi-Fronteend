@@ -1,20 +1,30 @@
 import { defineStore } from 'pinia'
-import { api } from '../services/api'
-import { DEMO_TRANSACTIONS } from '../services/demoData'
+import { api, ApiError } from '../services/api'
 
 export const useTransactionsStore = defineStore('transactions', {
   state: () => ({
     items: [],
     loading: false,
     error: null,
-    isDemo: false,
   }),
 
   getters: {
-    sorted: (state) => [...state.items].sort((a, b) => new Date(b.date) - new Date(a.date)),
-    recent: (state) => [...state.items].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6),
-    totalIncome: (state) => state.items.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0),
-    totalExpenses: (state) => state.items.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0),
+    sorted: (state) => {
+      const items = Array.isArray(state.items) ? state.items : []
+      return [...items].sort((a, b) => new Date(b.date) - new Date(a.date))
+    },
+    recent: (state) => {
+      const items = Array.isArray(state.items) ? state.items : []
+      return [...items].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6)
+    },
+    totalIncome: (state) => {
+      const items = Array.isArray(state.items) ? state.items : []
+      return items.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0)
+    },
+    totalExpenses: (state) => {
+      const items = Array.isArray(state.items) ? state.items : []
+      return items.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+    },
     balance() {
       return this.totalIncome - this.totalExpenses
     },
@@ -28,8 +38,12 @@ export const useTransactionsStore = defineStore('transactions', {
         this.items = await api.getTransactions('?limit=200')
         this.isDemo = false
       } catch (e) {
-        this.items = DEMO_TRANSACTIONS
-        this.isDemo = true
+        if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+          this.items = []
+          this.error = e.message
+          throw e
+        }
+        this.items = []
         this.error = e.message
       } finally {
         this.loading = false
@@ -37,22 +51,12 @@ export const useTransactionsStore = defineStore('transactions', {
     },
 
     async create(payload) {
-      if (this.isDemo) {
-        const local = { id: Date.now(), ...payload }
-        this.items.unshift(local)
-        return local
-      }
       const created = await api.createTransaction(payload)
       this.items.unshift(created)
       return created
     },
 
     async update(id, payload) {
-      if (this.isDemo) {
-        const idx = this.items.findIndex((t) => t.id === id)
-        if (idx > -1) this.items[idx] = { ...this.items[idx], ...payload }
-        return this.items[idx]
-      }
       const updated = await api.updateTransaction(id, payload)
       const idx = this.items.findIndex((t) => t.id === id)
       if (idx > -1) this.items[idx] = updated
@@ -60,7 +64,7 @@ export const useTransactionsStore = defineStore('transactions', {
     },
 
     async remove(id) {
-      if (!this.isDemo) await api.deleteTransaction(id)
+      await api.deleteTransaction(id)
       this.items = this.items.filter((t) => t.id !== id)
     },
   },

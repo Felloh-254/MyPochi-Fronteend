@@ -16,10 +16,6 @@ onMounted(() => {
 
 <template>
   <div class="view">
-    <p v-if="goalsStore.isDemo" class="demo-banner">
-      Showing demo data — changes here won't persist until the API is reachable.
-    </p>
-
     <div class="section-head">
       <div>
         <h2>Goals</h2>

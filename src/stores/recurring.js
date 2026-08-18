@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-import { api } from '../services/api'
-import { DEMO_RECURRING } from '../services/demoData'
+import { api, ApiError } from '../services/api'
 import { advanceDate } from '../utils/recurring'
 import { useTransactionsStore } from './transactions'
 
@@ -9,15 +8,18 @@ export const useRecurringStore = defineStore('recurring', {
     items: [],
     loading: false,
     error: null,
-    isDemo: false,
   }),
 
   getters: {
-    active: (state) => state.items.filter((r) => r.is_active),
+    active: (state) => {
+      const items = Array.isArray(state.items) ? state.items : []
+      return items.filter((r) => r.is_active)
+    },
     dueSoon: (state) => {
+      const items = Array.isArray(state.items) ? state.items : []
       const in7Days = new Date()
       in7Days.setDate(in7Days.getDate() + 7)
-      return state.items.filter((r) => r.is_active && new Date(r.next_run) <= in7Days)
+      return items.filter((r) => r.is_active && new Date(r.next_run) <= in7Days)
     },
   },
 
@@ -29,8 +31,12 @@ export const useRecurringStore = defineStore('recurring', {
         this.items = await api.getRecurring()
         this.isDemo = false
       } catch (e) {
-        this.items = DEMO_RECURRING
-        this.isDemo = true
+        if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+          this.items = []
+          this.error = e.message
+          throw e
+        }
+        this.items = []
         this.error = e.message
       } finally {
         this.loading = false
@@ -38,22 +44,12 @@ export const useRecurringStore = defineStore('recurring', {
     },
 
     async create(payload) {
-      if (this.isDemo) {
-        const local = { id: Date.now(), is_active: true, ...payload }
-        this.items.push(local)
-        return local
-      }
       const created = await api.createRecurring(payload)
       this.items.push(created)
       return created
     },
 
     async update(id, payload) {
-      if (this.isDemo) {
-        const idx = this.items.findIndex((r) => r.id === id)
-        if (idx > -1) this.items[idx] = { ...this.items[idx], ...payload }
-        return this.items[idx]
-      }
       const updated = await api.updateRecurring(id, payload)
       const idx = this.items.findIndex((r) => r.id === id)
       if (idx > -1) this.items[idx] = updated
@@ -66,7 +62,7 @@ export const useRecurringStore = defineStore('recurring', {
     },
 
     async remove(id) {
-      if (!this.isDemo) await api.deleteRecurring(id)
+      await api.deleteRecurring(id)
       this.items = this.items.filter((r) => r.id !== id)
     },
 
