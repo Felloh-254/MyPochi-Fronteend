@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 export const useUiStore = defineStore('ui', {
   state: () => ({
     mobileNavOpen: false,
+    sidebarCollapsed: false,
     txnModalOpen: false,
     budgetModalOpen: false,
     accountModalOpen: false,
