@@ -29,8 +29,15 @@ export const useBudgetsStore = defineStore('budgets', {
       this.loading = true
       this.error = null
       try {
-        this.items = await api.getBudgets(period)
-        this.isDemo = false
+        const payload = await api.getBudgets(period)
+        const items = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.items)
+            ? payload.items
+            : Array.isArray(payload?.budgets)
+              ? payload.budgets
+              : []
+        this.items = items
       } catch (e) {
         if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
           this.items = []

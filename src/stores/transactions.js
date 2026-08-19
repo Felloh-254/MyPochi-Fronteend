@@ -35,8 +35,15 @@ export const useTransactionsStore = defineStore('transactions', {
       this.loading = true
       this.error = null
       try {
-        this.items = await api.getTransactions('?limit=200')
-        this.isDemo = false
+        const payload = await api.getTransactions('?limit=200')
+        const items = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.items)
+            ? payload.items
+            : Array.isArray(payload?.transactions)
+              ? payload.transactions
+              : []
+        this.items = items
       } catch (e) {
         if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
           this.items = []

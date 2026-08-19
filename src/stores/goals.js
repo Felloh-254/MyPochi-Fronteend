@@ -14,8 +14,15 @@ export const useGoalsStore = defineStore('goals', {
       this.loading = true
       this.error = null
       try {
-        this.items = await api.getGoals()
-        this.isDemo = false
+        const payload = await api.getGoals()
+        const items = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.items)
+            ? payload.items
+            : Array.isArray(payload?.goals)
+              ? payload.goals
+              : []
+        this.items = items
       } catch (e) {
         if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
           this.items = []
