@@ -37,6 +37,13 @@ function accountName(accountId) {
 
 <template>
   <div class="view">
+    <div class="section-head">
+      <div>
+        <h2>Dashboard</h2>
+        <p>A clear view of where your money stands today.</p>
+      </div>
+    </div>
+
     <div class="hero-row">
       <StatCard
         variant="hero"
@@ -101,26 +108,28 @@ function accountName(accountId) {
         <h3>Recent transactions</h3>
         <router-link class="link-btn" to="/transactions">View all</router-link>
       </div>
-      <table class="txn-table">
-        <thead>
-          <tr>
-            <th>Transaction</th>
-            <th>Category</th>
-            <th>Account</th>
-            <th>Date</th>
-            <th style="text-align: right">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <TransactionRow
-            v-for="t in transactionsStore.recent"
-            :key="t.id"
-            :transaction="t"
-            :category-color="categoryColor(t.category)"
-            :account-name="accountName(t.account_id)"
-          />
-        </tbody>
-      </table>
+      <div class="transaction-table-wrap">
+        <table class="txn-table">
+          <thead>
+            <tr>
+              <th>Transaction</th>
+              <th>Category</th>
+              <th>Account</th>
+              <th>Date</th>
+              <th style="text-align: right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <TransactionRow
+              v-for="t in transactionsStore.recent"
+              :key="t.id"
+              :transaction="t"
+              :category-color="categoryColor(t.category)"
+              :account-name="accountName(t.account_id)"
+            />
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -131,6 +140,17 @@ function accountName(accountId) {
   flex-direction: column;
   gap: 22px;
   max-width: 1180px;
+  min-width: 0;
+  width: 100%;
+}
+.view > .card,
+.grid-2 > .card,
+.hero-row > * {
+  min-width: 0;
+}
+.transaction-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
 }
 .demo-banner {
   background: #fff7e6;

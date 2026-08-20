@@ -1,11 +1,13 @@
 <script setup>
 import { useRoute } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import { useNotificationsStore } from '../stores/notifications'
 import Icon from './Icon.vue'
 import NotificationsPanel from './NotificationsPanel.vue'
 
 const route = useRoute()
+const auth = useAuthStore()
 const ui = useUiStore()
 const notifications = useNotificationsStore()
 
@@ -21,12 +23,12 @@ const todayLabel = new Date().toLocaleDateString('en-US', {
     <button class="menu-toggle" @click="ui.mobileNavOpen = !ui.mobileNavOpen" aria-label="Toggle menu">
       <Icon name="menu" size="18" />
     </button>
-    <div class="topbar-title">
-      <h1>{{ route.meta.title }}</h1>
+    <div class="date-context">
+      <span class="eyebrow">Today</span>
       <p>{{ todayLabel }}</p>
     </div>
     <div class="topbar-actions">
-      <div class="search">
+      <div v-if="route.name === 'dashboard' || route.name === 'transactions'" class="search">
         <Icon name="search" size="15" />
         <input v-model="ui.searchQuery" placeholder="Search transactions" />
       </div>
@@ -34,7 +36,19 @@ const todayLabel = new Date().toLocaleDateString('en-US', {
         <Icon name="bell" size="17" />
         <span v-if="notifications.count" class="bell-badge">{{ notifications.count }}</span>
       </button>
-      <button class="btn btn-primary" @click="ui.openTxnModal()">+ Add transaction</button>
+      <div class="profile-chip">
+        <img
+          v-if="auth.user?.avatar || auth.user?.avatar_url || auth.user?.picture"
+          :src="auth.user.avatar || auth.user.avatar_url || auth.user.picture"
+          :alt="`${auth.user?.name || 'User'} profile photo`"
+          class="profile-avatar"
+        />
+        <div v-else class="profile-avatar profile-initials">{{ auth.initials }}</div>
+        <div class="profile-details">
+          <strong>{{ auth.user?.name || 'User' }}</strong>
+          <span>{{ auth.user?.email }}</span>
+        </div>
+      </div>
     </div>
     <NotificationsPanel v-if="ui.notificationsPanelOpen" />
   </header>
@@ -63,6 +77,51 @@ const todayLabel = new Date().toLocaleDateString('en-US', {
 .bell-btn:hover {
   color: var(--text);
 }
+.profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-left: 4px;
+  border-left: 1px solid var(--line);
+}
+.profile-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.profile-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mint);
+  color: var(--ink);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.profile-details strong,
+.profile-details span {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-details strong {
+  color: var(--text);
+  font-size: 12.5px;
+}
+.profile-details span {
+  color: var(--text-soft);
+  font-size: 11px;
+}
 .bell-badge {
   position: absolute;
   top: -5px;
@@ -86,13 +145,14 @@ const todayLabel = new Date().toLocaleDateString('en-US', {
   border-radius: 8px;
   padding: 8px;
 }
-.topbar-title h1 {
-  font-size: 21px;
+.date-context {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
-.topbar-title p {
+.date-context p {
   font-size: 12.5px;
   color: var(--text-soft);
-  margin-top: 2px;
 }
 .topbar-actions {
   margin-left: auto;
@@ -134,8 +194,15 @@ const todayLabel = new Date().toLocaleDateString('en-US', {
   .search input {
     width: 150px;
   }
-  .topbar-title p {
+  .date-context {
     display: none;
+  }
+  .profile-details {
+    display: none;
+  }
+  .profile-chip {
+    border-left: 0;
+    padding-left: 0;
   }
 }
 </style>

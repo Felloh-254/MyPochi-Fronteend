@@ -1,12 +1,10 @@
 <script setup>
 import { useRoute } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import Icon from './Icon.vue'
 import logo from '../assets/Logo.png'
 
 const route = useRoute()
-const auth = useAuthStore()
 const ui = useUiStore()
 
 const navItems = [
@@ -53,15 +51,6 @@ const navItems = [
       </router-link>
     </nav>
 
-    <div class="sidebar-foot">
-      <div class="user-chip">
-        <div class="avatar">{{ auth.initials }}</div>
-        <div class="user-details">
-          <div class="user-name">{{ auth.user?.name }}</div>
-          <div class="user-email">{{ auth.user?.email }}</div>
-        </div>
-      </div>
-    </div>
   </aside>
 </template>
 
@@ -77,6 +66,7 @@ const navItems = [
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow-x: hidden;
   transition: width 0.2s ease, padding 0.2s ease;
 }
 .sidebar.collapsed {
@@ -85,22 +75,26 @@ const navItems = [
   padding-right: 12px;
 }
 .brand {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
-  padding: 4px 8px 28px 8px;
+  min-width: 0;
+  padding: 4px 40px 28px 8px;
 }
 .brand-mark {
-  width: 190px;
+  width: 100%;
   max-width: 100%;
+  min-width: 0;
   height: auto;
   display: block;
   filter: brightness(0) invert(1);
   transition: width 0.2s ease;
 }
 .collapse-toggle {
-  flex-shrink: 0;
+  position: absolute;
+  top: 4px;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -119,11 +113,16 @@ const navItems = [
 }
 .sidebar.collapsed .brand {
   flex-direction: column;
-  padding-left: 0;
-  padding-right: 0;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0 28px;
+}
+.sidebar.collapsed .collapse-toggle {
+  position: static;
 }
 .sidebar.collapsed .brand-mark {
   width: 42px;
+  max-width: 42px;
   overflow: hidden;
 }
 
@@ -165,50 +164,8 @@ const navItems = [
   padding-left: 10px;
   padding-right: 10px;
 }
-.sidebar.collapsed .nav-item span,
-.sidebar.collapsed .user-details {
+.sidebar.collapsed .nav-item span {
   display: none;
-}
-
-.sidebar-foot {
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px dashed #34345e;
-}
-.user-chip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px;
-  border-radius: 10px;
-}
-.sidebar.collapsed .user-chip {
-  justify-content: center;
-  padding-left: 0;
-  padding-right: 0;
-}
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--mint);
-  color: var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  flex-shrink: 0;
-}
-.user-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-}
-.user-email {
-  font-size: 11.5px;
-  color: #9494be;
 }
 
 @media (max-width: 760px) {
@@ -239,14 +196,8 @@ const navItems = [
     padding-left: 12px;
     padding-right: 12px;
   }
-  .sidebar.collapsed .nav-item span,
-  .sidebar.collapsed .user-details {
+  .sidebar.collapsed .nav-item span {
     display: block;
-  }
-  .sidebar.collapsed .user-chip {
-    justify-content: flex-start;
-    padding-left: 8px;
-    padding-right: 8px;
   }
   .collapse-toggle {
     display: none;

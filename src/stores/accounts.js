@@ -22,7 +22,7 @@ export const useAccountsStore = defineStore('accounts', {
       const net = transactionItems
         .filter((t) => t.account_id === accountId)
         .reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0)
-      return (account.starting_balance || 0) + net
+      return (account.balance ?? account.starting_balance ?? 0) + net
     },
 
     totalBalance() {

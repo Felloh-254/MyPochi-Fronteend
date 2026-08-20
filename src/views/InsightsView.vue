@@ -66,6 +66,13 @@ const biggestSpendDay = computed(() => {
 
 <template>
   <div class="view">
+    <div class="section-head">
+      <div>
+        <h2>Insights</h2>
+        <p>Spot patterns and make your next money move with confidence.</p>
+      </div>
+    </div>
+
     <div class="hero-row">
       <div class="card stat">
         <span class="card-label">Savings rate</span>

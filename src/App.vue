@@ -57,6 +57,8 @@ onBeforeUnmount(() => {
 }
 .content {
   padding: 4px 36px 48px;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 @media (max-width: 760px) {

@@ -232,14 +232,17 @@ table.txn-table {
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
+  padding: 8px 0 18px;
+  border-bottom: 1px solid var(--line);
 }
 .section-head h2 {
-  font-size: 20px;
+  font-size: 26px;
+  line-height: 1.1;
 }
 .section-head p {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--text-soft);
-  margin-top: 4px;
+  margin-top: 7px;
 }
 
 /* ---------- Form fields, shared by all modals ---------- */
@@ -257,16 +260,20 @@ table.txn-table {
 .field input,
 .field select,
 .field textarea {
-  padding: 10px 12px;
+  padding: 11px 13px;
   border-radius: 9px;
-  border: 1px solid var(--line);
+  border: 1px solid #dcdceb;
+  background: #fbfbfe;
   font-size: 13.5px;
   color: var(--text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
   border-color: var(--violet);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(124, 111, 238, 0.12);
 }
 .field-row {
   display: grid;
@@ -281,7 +288,9 @@ table.txn-table {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
 }
 
 /* ---------- Print (used by the Reports view "Save as PDF" flow) ---------- */
