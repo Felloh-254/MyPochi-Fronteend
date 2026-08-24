@@ -58,6 +58,11 @@ export const api = {
     body: payload, 
     auth: false 
   }),
+  googleLogin: (payload) => request('/api/auth/google', {
+    method: 'POST',
+    body: payload,
+    auth: false,
+  }),
   me: () => request('/api/me'),
 
   getBudgets: (period) => request(`/api/budgets${period ? `?period=${period}` : ''}`),

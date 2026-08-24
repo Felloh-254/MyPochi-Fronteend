@@ -52,7 +52,7 @@ src/
 
 ```bash
 npm install
-cp .env      # point VITE_API_URL at your running backend
+# Set VITE_API_URL and VITE_GOOGLE_CLIENT_ID in .env
 npm run dev
 ```
 
@@ -72,6 +72,10 @@ npm run preview    # serve the production build locally
 
 Beyond the original auth/budgets/transactions/summary routes, these views
 assume the backend exposes:
+
+```
+POST       /api/auth/google   { credential }
+```
 
 ```
 GET/POST   /api/accounts

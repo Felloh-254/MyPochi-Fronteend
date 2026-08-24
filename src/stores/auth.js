@@ -51,6 +51,20 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async googleLogin(credential) {
+      this.loading = true
+      this.error = null
+      try {
+        const data = await api.googleLogin({ credential })
+        this._setSession(data)
+      } catch (e) {
+        this.error = e.message || 'Google sign-in failed'
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
+
     clearSession(message = null) {
       this.token = null
       this.user = null

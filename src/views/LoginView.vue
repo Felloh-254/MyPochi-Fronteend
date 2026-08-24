@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import logo from '../assets/Logo.png'
@@ -10,6 +10,49 @@ const auth = useAuthStore()
 
 const mode = ref('login') // 'login' | 'register'
 const form = reactive({ email: '', password: '', name: '' })
+const googleReady = ref(false)
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+
+function handleGoogleCredential(response) {
+  auth.googleLogin(response.credential)
+    .then(() => router.push(route.query.redirect || '/dashboard'))
+    .catch(() => {})
+}
+
+function loadGoogleSignIn() {
+  if (!googleClientId) return
+
+  const initialize = () => {
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: handleGoogleCredential,
+    })
+    googleReady.value = true
+  }
+
+  if (window.google?.accounts?.id) {
+    initialize()
+    return
+  }
+
+  const script = document.createElement('script')
+  script.src = 'https://accounts.google.com/gsi/client'
+  script.async = true
+  script.defer = true
+  script.onload = initialize
+  document.head.appendChild(script)
+}
+
+function signInWithGoogle() {
+  if (!googleClientId) {
+    auth.error = 'Google sign-in is not configured.'
+    return
+  }
+  if (!googleReady.value) return
+  window.google.accounts.id.prompt()
+}
+
+onMounted(loadGoogleSignIn)
 
 async function submit() {
   try {
@@ -100,6 +143,18 @@ function toggleMode() {
             {{ auth.loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account' }}
           </button>
         </form>
+
+        <div class="auth-divider"><span>or continue with</span></div>
+
+        <button
+          type="button"
+          class="google-btn"
+          :disabled="auth.loading || (!!googleClientId && !googleReady)"
+          @click="signInWithGoogle"
+        >
+          <span class="google-mark" aria-hidden="true">G</span>
+          {{ googleReady ? 'Continue with Google' : 'Google sign-in unavailable' }}
+        </button>
 
         <p class="switch">
           {{ mode === 'login' ? "Don't have an account?" : 'Already have an account?' }}
@@ -368,6 +423,59 @@ function toggleMode() {
   border-radius: 11px;
   font-size: 13px;
   box-shadow: 0 8px 20px rgba(92, 81, 216, 0.22);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 14px;
+  color: var(--text-faint);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: rgba(122, 128, 164, 0.16);
+}
+
+.google-btn {
+  width: 100%;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid rgba(122, 128, 164, 0.2);
+  border-radius: 11px;
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.google-btn:not(:disabled):hover {
+  border-color: rgba(66, 133, 244, 0.55);
+  box-shadow: 0 6px 16px rgba(66, 133, 244, 0.12);
+  transform: translateY(-1px);
+}
+
+.google-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.google-mark {
+  color: #4285f4;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .switch {
