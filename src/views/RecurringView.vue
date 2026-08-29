@@ -30,7 +30,7 @@ function accountName(accountId) {
       <button class="btn btn-primary" @click="ui.openRecurringModal()">+ New recurring</button>
     </div>
 
-    <div class="card" style="padding: 8px 22px 22px" v-if="recurringStore.items.length">
+    <div class="card content-enter" style="padding: 8px 22px 22px" v-if="recurringStore.items.length">
       <table class="txn-table">
         <thead>
           <tr>
@@ -49,12 +49,13 @@ function accountName(accountId) {
             :key="r.id"
             :item="r"
             :account-name="accountName(r.account_id)"
+            class="table-row-enter-active"
           />
         </tbody>
       </table>
     </div>
 
-    <p v-else class="empty">
+    <p v-else class="empty content-enter">
       Nothing recurring yet. Add rent, salary, or a subscription to have it post automatically.
     </p>
   </div>

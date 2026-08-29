@@ -32,6 +32,7 @@ const complete = computed(() => isGoalComplete(props.goal))
       <svg viewBox="0 0 64 64" class="ring">
         <circle cx="32" cy="32" r="27" fill="none" stroke="var(--canvas)" stroke-width="7" />
         <circle
+          class="ring-progress"
           cx="32"
           cy="32"
           r="27"
@@ -102,6 +103,9 @@ const complete = computed(() => isGoalComplete(props.goal))
   width: 64px;
   height: 64px;
   flex-shrink: 0;
+}
+.ring-progress {
+  transition: stroke-dashoffset 0.5s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.2s ease;
 }
 .ring-text {
   font-family: 'JetBrains Mono', monospace;

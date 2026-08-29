@@ -6,6 +6,7 @@ import { useUiStore } from './stores/ui'
 import AppSidebar from './components/AppSidebar.vue'
 import AppTopbar from './components/AppTopbar.vue'
 import AddTransactionModal from './components/AddTransactionModal.vue'
+import './styles/animations.css'
 
 const auth = useAuthStore()
 const ui = useUiStore()
@@ -35,11 +36,19 @@ onBeforeUnmount(() => {
     <div class="main">
       <AppTopbar class="no-print" />
       <main class="content">
-        <router-view />
+        <router-view v-slot="{ Component, route }">
+          <Transition name="page" mode="out-in">
+            <component :is="Component" :key="route.fullPath" />
+          </Transition>
+        </router-view>
       </main>
     </div>
   </div>
-  <router-view v-else />
+  <router-view v-else v-slot="{ Component, route }">
+    <Transition name="page" mode="out-in">
+      <component :is="Component" :key="route.fullPath" />
+    </Transition>
+  </router-view>
 
   <AddTransactionModal v-if="auth.isAuthenticated && ui.txnModalOpen" />
 </template>

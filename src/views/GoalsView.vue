@@ -25,10 +25,10 @@ onMounted(() => {
     </div>
 
     <div class="goal-grid" v-if="goalsStore.items.length">
-      <GoalCard v-for="g in goalsStore.items" :key="g.id" :goal="g" />
+      <GoalCard v-for="g in goalsStore.items" :key="g.id" :goal="g" class="card-grid-enter-active" />
     </div>
 
-    <p v-else class="empty">No goals yet. Set a target and start chipping away at it.</p>
+    <p v-else class="empty content-enter">No goals yet. Set a target and start chipping away at it.</p>
   </div>
 
   <NewGoalModal v-if="ui.goalModalOpen" />

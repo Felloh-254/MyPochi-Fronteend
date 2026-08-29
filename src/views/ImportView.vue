@@ -61,7 +61,7 @@ async function runImport() {
       </div>
     </div>
 
-    <div class="card upload-card">
+    <div class="card upload-card content-enter">
       <label class="upload-zone">
         <input type="file" accept=".csv" @change="handleFile" hidden />
         <span class="upload-title">{{ fileName || 'Choose a CSV file' }}</span>
@@ -69,10 +69,10 @@ async function runImport() {
       </label>
     </div>
 
-    <p v-if="importedCount" class="success-banner">Imported {{ importedCount }} transactions.</p>
+    <p v-if="importedCount" class="success-banner content-enter">Imported {{ importedCount }} transactions.</p>
 
     <template v-if="rows.length">
-      <div class="card preview-head">
+      <div class="card preview-head content-enter content-enter--delay-1">
         <div>
           <span class="format-tag">{{ format === 'mpesa' ? 'M-Pesa statement detected' : 'Generic CSV' }}</span>
           <p class="preview-summary">
@@ -92,7 +92,7 @@ async function runImport() {
         </div>
       </div>
 
-      <div class="card" style="padding: 8px 22px 22px">
+      <div class="card content-enter content-enter--delay-2" style="padding: 8px 22px 22px">
         <table class="txn-table">
           <thead>
             <tr>
@@ -105,7 +105,7 @@ async function runImport() {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(r, i) in rows" :key="i">
+            <tr v-for="(r, i) in rows" :key="i" class="table-row-enter-active">
               <td><input type="checkbox" v-model="r.include" /></td>
               <td class="txn-date">{{ formatDate(r.date) }}</td>
               <td class="txn-title">{{ r.title }}</td>

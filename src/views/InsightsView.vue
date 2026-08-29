@@ -74,19 +74,19 @@ const biggestSpendDay = computed(() => {
     </div>
 
     <div class="hero-row">
-      <div class="card stat">
+      <div class="card stat stat-card-enter-active">
         <span class="card-label">Savings rate</span>
         <span class="figure mono" :class="savingsRate >= 0 ? 'positive' : 'negative'">{{ savingsRate }}%</span>
         <span class="sub-label">of income kept this period</span>
       </div>
-      <div class="card stat" v-if="monthOverMonth">
+      <div class="card stat stat-card-enter-active" v-if="monthOverMonth">
         <span class="card-label">Spending vs. last month</span>
         <span class="figure mono" :class="monthOverMonth.pctChange <= 0 ? 'positive' : 'negative'">
           {{ monthOverMonth.pctChange > 0 ? '+' : '' }}{{ monthOverMonth.pctChange }}%
         </span>
         <span class="sub-label">{{ formatCurrency(monthOverMonth.latest.expense) }} vs {{ formatCurrency(monthOverMonth.prev.expense) }}</span>
       </div>
-      <div class="card stat">
+      <div class="card stat stat-card-enter-active">
         <span class="card-label">Biggest spend day</span>
         <span class="figure mono">{{ biggestSpendDay?.[0] ?? '—' }}</span>
         <span class="sub-label">{{ formatCurrency(biggestSpendDay?.[1] ?? 0) }} typically</span>
@@ -94,14 +94,14 @@ const biggestSpendDay = computed(() => {
     </div>
 
     <div class="grid-2">
-      <div class="card chart-card">
+      <div class="card chart-card chart-enter-active">
         <div class="card-head">
           <h3>Spending trend</h3>
           <span class="eyebrow">Last 6 months</span>
         </div>
         <CashFlowChart :monthly-data="summaryStore.monthlyData" />
       </div>
-      <div class="card chart-card">
+      <div class="card chart-card chart-enter-active">
         <div class="card-head">
           <h3>Spending by day of week</h3>
           <span class="eyebrow">All transactions</span>
@@ -110,7 +110,7 @@ const biggestSpendDay = computed(() => {
       </div>
     </div>
 
-    <div class="card">
+    <div class="card content-enter content-enter--delay-1">
       <div class="card-head">
         <h3>Highest spending categories</h3>
         <span class="eyebrow">Ranked</span>
@@ -198,6 +198,7 @@ const biggestSpendDay = computed(() => {
   height: 100%;
   background: var(--violet);
   border-radius: 20px;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .rank-amount {
   font-size: 12.5px;

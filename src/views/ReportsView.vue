@@ -57,7 +57,7 @@ function printReport() {
       </div>
     </div>
 
-    <div class="card date-range no-print">
+    <div class="card date-range no-print content-enter">
       <div class="field">
         <label>From</label>
         <input v-model="from" type="date" />
@@ -68,7 +68,7 @@ function printReport() {
       </div>
     </div>
 
-    <div class="card printable">
+    <div class="card printable content-enter content-enter--delay-1">
       <h2 class="report-title">MyPochi — Financial report</h2>
       <p class="report-range">{{ formatDate(from) }} – {{ formatDate(to) }}</p>
 
@@ -98,7 +98,7 @@ function printReport() {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="t in inRange" :key="t.id">
+          <tr v-for="t in inRange" :key="t.id" class="table-row-enter-active">
             <td class="txn-date">{{ formatDate(t.date) }}</td>
             <td class="txn-title">{{ t.title }}</td>
             <td class="txn-date">{{ t.category }}</td>

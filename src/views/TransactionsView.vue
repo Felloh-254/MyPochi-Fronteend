@@ -47,13 +47,13 @@ function accountName(accountId) {
       <button class="btn btn-primary" @click="ui.openTxnModal()">+ Add transaction</button>
     </div>
 
-    <div class="filter-row">
+    <div class="filter-row content-enter">
       <button v-for="f in ['all', 'income', 'expense']" :key="f" :class="{ active: filter === f }" @click="filter = f">
         {{ f }}
       </button>
     </div>
 
-    <div class="card" style="padding: 8px 22px 22px">
+    <div class="card content-enter content-enter--delay-1" style="padding: 8px 22px 22px">
       <table class="txn-table" v-if="filtered.length">
         <thead>
           <tr>
@@ -73,6 +73,7 @@ function accountName(accountId) {
             :category-color="categoryColor(t.category)"
             :account-name="accountName(t.account_id)"
             show-note
+            class="table-row-enter-active"
           />
         </tbody>
       </table>

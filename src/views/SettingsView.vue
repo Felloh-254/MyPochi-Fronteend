@@ -22,7 +22,7 @@ function signOut() {
       </div>
     </div>
 
-    <div class="card settings-card">
+    <div class="card settings-card content-enter">
       <div class="settings-avatar">{{ auth.initials }}</div>
       <div>
         <div class="name">{{ auth.user?.name }}</div>
@@ -30,7 +30,7 @@ function signOut() {
       </div>
     </div>
 
-    <div class="card">
+    <div class="card content-enter content-enter--delay-1">
       <div class="settings-row"><span class="label">Currency</span><span>KES (Ksh)</span></div>
       <div class="settings-row">
         <span class="label">Member since</span>
@@ -39,7 +39,7 @@ function signOut() {
       <div class="settings-row"><span class="label">Connected budgets</span><span>{{ budgetsStore.items.length }}</span></div>
     </div>
 
-    <button class="btn btn-ghost" style="align-self: flex-start" @click="signOut">Sign out</button>
+    <button class="btn btn-ghost content-enter content-enter--delay-2" style="align-self: flex-start" @click="signOut">Sign out</button>
   </div>
 </template>
 
