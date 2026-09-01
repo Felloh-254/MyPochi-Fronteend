@@ -2,14 +2,21 @@
 import { ref, computed, onMounted } from 'vue'
 import { useTransactionsStore } from '../stores/transactions'
 import { useAccountsStore } from '../stores/accounts'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import { parseTransactionsCsv } from '../utils/csvImport'
 import { formatCurrency, formatDate } from '../utils/format'
 
 const transactionsStore = useTransactionsStore()
 const accountsStore = useAccountsStore()
+const { errors, addError, dismissError } = useErrorHandler()
 
 onMounted(() => {
-  if (accountsStore.items.length === 0) accountsStore.fetch()
+  if (accountsStore.items.length === 0) {
+    accountsStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load accounts', 'error')
+    }).catch(() => {})
+  }
 })
 
 const rows = ref([])
@@ -54,6 +61,14 @@ async function runImport() {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Import</h2>

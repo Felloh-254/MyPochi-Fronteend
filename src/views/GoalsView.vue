@@ -2,20 +2,35 @@
 import { onMounted } from 'vue'
 import { useGoalsStore } from '../stores/goals'
 import { useUiStore } from '../stores/ui'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import GoalCard from '../components/GoalCard.vue'
 import NewGoalModal from '../components/NewGoalModal.vue'
 import ContributeGoalModal from '../components/ContributeGoalModal.vue'
 
 const goalsStore = useGoalsStore()
 const ui = useUiStore()
+const { errors, addError, dismissError } = useErrorHandler()
 
 onMounted(() => {
-  if (goalsStore.items.length === 0) goalsStore.fetch()
+  if (goalsStore.items.length === 0) {
+    goalsStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load goals', 'error')
+    }).catch(() => {})
+  }
 })
 </script>
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Goals</h2>

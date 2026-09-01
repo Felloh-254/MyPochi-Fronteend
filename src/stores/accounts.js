@@ -46,13 +46,12 @@ export const useAccountsStore = defineStore('accounts', {
               : []
         this.items = items
       } catch (e) {
-        if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
-          this.items = []
-          this.error = e.message
-          throw e
-        }
         this.items = []
         this.error = e.message
+        if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+          throw e
+        }
+        throw e
       } finally {
         this.loading = false
       }

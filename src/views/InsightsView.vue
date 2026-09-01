@@ -3,6 +3,8 @@ import { onMounted, computed } from 'vue'
 import { useTransactionsStore } from '../stores/transactions'
 import { useBudgetsStore } from '../stores/budgets'
 import { useSummaryStore } from '../stores/summary'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import { formatCurrency } from '../utils/format'
 import CashFlowChart from '../components/charts/CashFlowChart.vue'
 import WeekdaySpendChart from '../components/charts/WeekdaySpendChart.vue'
@@ -10,11 +12,24 @@ import WeekdaySpendChart from '../components/charts/WeekdaySpendChart.vue'
 const transactionsStore = useTransactionsStore()
 const budgetsStore = useBudgetsStore()
 const summaryStore = useSummaryStore()
+const { errors, addError, dismissError } = useErrorHandler()
 
 onMounted(() => {
-  if (transactionsStore.items.length === 0) transactionsStore.fetch()
-  if (budgetsStore.items.length === 0) budgetsStore.fetch()
-  if (summaryStore.monthlyData.length === 0) summaryStore.fetch()
+  if (transactionsStore.items.length === 0) {
+    transactionsStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load transactions', 'error')
+    }).catch(() => {})
+  }
+  if (budgetsStore.items.length === 0) {
+    budgetsStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load budgets', 'error')
+    }).catch(() => {})
+  }
+  if (summaryStore.monthlyData.length === 0) {
+    summaryStore.fetch().catch(() => {
+      // Silently fail for summary as charts can be empty
+    })
+  }
 })
 
 // Savings rate = (income - expenses) / income
@@ -66,6 +81,14 @@ const biggestSpendDay = computed(() => {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Insights</h2>

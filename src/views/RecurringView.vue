@@ -3,16 +3,27 @@ import { onMounted } from 'vue'
 import { useRecurringStore } from '../stores/recurring'
 import { useAccountsStore } from '../stores/accounts'
 import { useUiStore } from '../stores/ui'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import RecurringRow from '../components/RecurringRow.vue'
 import NewRecurringModal from '../components/NewRecurringModal.vue'
 
 const recurringStore = useRecurringStore()
 const accountsStore = useAccountsStore()
 const ui = useUiStore()
+const { errors, addError, dismissError } = useErrorHandler()
 
 onMounted(() => {
-  if (recurringStore.items.length === 0) recurringStore.fetch()
-  if (accountsStore.items.length === 0) accountsStore.fetch()
+  if (recurringStore.items.length === 0) {
+    recurringStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load recurring transactions', 'error')
+    }).catch(() => {}) // Prevent unhandled rejection
+  }
+  if (accountsStore.items.length === 0) {
+    accountsStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load accounts', 'warning')
+    }).catch(() => {}) // Prevent unhandled rejection
+  }
 })
 
 function accountName(accountId) {
@@ -22,6 +33,14 @@ function accountName(accountId) {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Recurring</h2>

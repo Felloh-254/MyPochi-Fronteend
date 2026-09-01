@@ -3,17 +3,32 @@ import { onMounted, ref, computed } from 'vue'
 import { useTransactionsStore } from '../stores/transactions'
 import { useAccountsStore } from '../stores/accounts'
 import { useBudgetsStore } from '../stores/budgets'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import { formatCurrency, formatDate } from '../utils/format'
 import { transactionsToCsv, downloadCsv } from '../utils/csvExport'
 
 const transactionsStore = useTransactionsStore()
 const accountsStore = useAccountsStore()
 const budgetsStore = useBudgetsStore()
+const { errors, addError, dismissError } = useErrorHandler()
 
 onMounted(() => {
-  if (transactionsStore.items.length === 0) transactionsStore.fetch()
-  if (accountsStore.items.length === 0) accountsStore.fetch()
-  if (budgetsStore.items.length === 0) budgetsStore.fetch()
+  if (transactionsStore.items.length === 0) {
+    transactionsStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load transactions', 'error')
+    }).catch(() => {})
+  }
+  if (accountsStore.items.length === 0) {
+    accountsStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load accounts', 'error')
+    }).catch(() => {})
+  }
+  if (budgetsStore.items.length === 0) {
+    budgetsStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load budgets', 'error')
+    }).catch(() => {})
+  }
 })
 
 const today = new Date().toISOString().slice(0, 10)
@@ -46,6 +61,14 @@ function printReport() {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head no-print">
       <div>
         <h2>Reports</h2>

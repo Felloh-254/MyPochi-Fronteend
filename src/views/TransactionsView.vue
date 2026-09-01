@@ -4,19 +4,34 @@ import { useTransactionsStore } from '../stores/transactions'
 import { useBudgetsStore } from '../stores/budgets'
 import { useAccountsStore } from '../stores/accounts'
 import { useUiStore } from '../stores/ui'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import TransactionRow from '../components/TransactionRow.vue'
 
 const transactionsStore = useTransactionsStore()
 const budgetsStore = useBudgetsStore()
 const accountsStore = useAccountsStore()
 const ui = useUiStore()
+const { errors, addError, dismissError } = useErrorHandler()
 
 const filter = ref('all')
 
 onMounted(() => {
-  if (transactionsStore.items.length === 0) transactionsStore.fetch()
-  if (budgetsStore.items.length === 0) budgetsStore.fetch()
-  if (accountsStore.items.length === 0) accountsStore.fetch()
+  if (transactionsStore.items.length === 0) {
+    transactionsStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load transactions', 'error')
+    }).catch(() => {})
+  }
+  if (budgetsStore.items.length === 0) {
+    budgetsStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load budgets', 'error')
+    }).catch(() => {})
+  }
+  if (accountsStore.items.length === 0) {
+    accountsStore.fetch().catch((e) => {
+      addError(e?.message || 'Failed to load accounts', 'error')
+    }).catch(() => {})
+  }
 })
 
 const filtered = computed(() => {
@@ -39,6 +54,14 @@ function accountName(accountId) {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Transactions</h2>

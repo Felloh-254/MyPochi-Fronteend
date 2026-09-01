@@ -17,10 +17,11 @@ const { errors, addError, dismissError } = useErrorHandler()
 
 onMounted(() => {
   budgetsStore.fetch(budgetsStore.period).catch((e) => {
-    addError(e.message || 'Failed to load budgets', 'error')
-  })
-  budgetsStore.fetchHistory(6).catch((e) => {
-    addError('Failed to load budget history', 'warning')
+    addError(e?.message || 'Failed to load budgets', 'error')
+  }).catch(() => {}) // Prevent unhandled rejection
+  
+  budgetsStore.fetchHistory(6).catch(() => {
+    // Silently fail for history as it's not critical
   })
 })
 
@@ -38,6 +39,14 @@ function handleDelete(id) {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Budgets</h2>
