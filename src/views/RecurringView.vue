@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue'
 import { useRecurringStore } from '../stores/recurring'
 import { useAccountsStore } from '../stores/accounts'
 import { useUiStore } from '../stores/ui'
@@ -12,19 +11,6 @@ const recurringStore = useRecurringStore()
 const accountsStore = useAccountsStore()
 const ui = useUiStore()
 const { errors, addError, dismissError } = useErrorHandler()
-
-onMounted(() => {
-  if (recurringStore.items.length === 0) {
-    recurringStore.fetch().catch((e) => {
-      addError(e?.message || 'Failed to load recurring transactions', 'error')
-    }).catch(() => {}) // Prevent unhandled rejection
-  }
-  if (accountsStore.items.length === 0) {
-    accountsStore.fetch().catch((e) => {
-      addError(e?.message || 'Failed to load accounts', 'warning')
-    }).catch(() => {}) // Prevent unhandled rejection
-  }
-})
 
 function accountName(accountId) {
   return accountsStore.items.find((a) => a.id === accountId)?.name ?? ''

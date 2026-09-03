@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue'
 import { useGoalsStore } from '../stores/goals'
 import { useUiStore } from '../stores/ui'
 import ErrorAlert from '../components/ErrorAlert.vue'
@@ -12,13 +11,6 @@ const goalsStore = useGoalsStore()
 const ui = useUiStore()
 const { errors, addError, dismissError } = useErrorHandler()
 
-onMounted(() => {
-  if (goalsStore.items.length === 0) {
-    goalsStore.fetch().catch((e) => {
-      addError(e?.message || 'Failed to load goals', 'error')
-    }).catch(() => {})
-  }
-})
 </script>
 
 <template>

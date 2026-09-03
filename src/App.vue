@@ -6,6 +6,7 @@ import { useUiStore } from './stores/ui'
 import AppSidebar from './components/AppSidebar.vue'
 import AppTopbar from './components/AppTopbar.vue'
 import AddTransactionModal from './components/AddTransactionModal.vue'
+import ErrorAlert from './components/ErrorAlert.vue'
 import './styles/animations.css'
 
 const auth = useAuthStore()
@@ -19,6 +20,10 @@ const handleUnauthorized = (event) => {
   if (router.currentRoute.value.name !== 'unauthorized') {
     router.replace({ name: 'unauthorized' })
   }
+}
+
+function retryRouteData() {
+  window.location.reload()
 }
 
 onMounted(() => {
@@ -35,19 +40,23 @@ onBeforeUnmount(() => {
     <AppSidebar class="no-print" />
     <div class="main">
       <AppTopbar class="no-print" />
+      <ErrorAlert
+        v-if="ui.routeDataError"
+        class="route-error no-print"
+        :message="ui.routeDataError.message"
+        type="error"
+        :action="{ label: 'Retry', handler: retryRouteData }"
+        @dismiss="ui.clearRouteDataError()"
+      />
       <main class="content">
         <router-view v-slot="{ Component, route }">
-          <Transition name="page" mode="out-in">
-            <component :is="Component" :key="route.fullPath" />
-          </Transition>
+          <component :is="Component" :key="route.fullPath" />
         </router-view>
       </main>
     </div>
   </div>
   <router-view v-else v-slot="{ Component, route }">
-    <Transition name="page" mode="out-in">
-      <component :is="Component" :key="route.fullPath" />
-    </Transition>
+    <component :is="Component" :key="route.fullPath" />
   </router-view>
 
   <AddTransactionModal v-if="auth.isAuthenticated && ui.txnModalOpen" />

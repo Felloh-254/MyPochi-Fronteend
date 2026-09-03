@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useTransactionsStore } from '../stores/transactions'
 import { useAccountsStore } from '../stores/accounts'
 import { useBudgetsStore } from '../stores/budgets'
@@ -12,24 +12,6 @@ const transactionsStore = useTransactionsStore()
 const accountsStore = useAccountsStore()
 const budgetsStore = useBudgetsStore()
 const { errors, addError, dismissError } = useErrorHandler()
-
-onMounted(() => {
-  if (transactionsStore.items.length === 0) {
-    transactionsStore.fetch().catch((e) => {
-      addError(e?.message || 'Failed to load transactions', 'error')
-    }).catch(() => {})
-  }
-  if (accountsStore.items.length === 0) {
-    accountsStore.fetch().catch((e) => {
-      addError(e?.message || 'Failed to load accounts', 'error')
-    }).catch(() => {})
-  }
-  if (budgetsStore.items.length === 0) {
-    budgetsStore.fetch().catch((e) => {
-      addError(e?.message || 'Failed to load budgets', 'error')
-    }).catch(() => {})
-  }
-})
 
 const today = new Date().toISOString().slice(0, 10)
 const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)

@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue'
 import { useBudgetsStore } from '../stores/budgets'
 import { useTransactionsStore } from '../stores/transactions'
 import { useSummaryStore } from '../stores/summary'
@@ -21,21 +20,6 @@ const summaryStore = useSummaryStore()
 const accountsStore = useAccountsStore()
 const ui = useUiStore()
 const { errors, addError, dismissError } = useErrorHandler()
-
-onMounted(() => {
-  Promise.allSettled([
-    budgetsStore.fetch(),
-    transactionsStore.fetch(),
-    summaryStore.fetch(),
-    accountsStore.fetch(),
-  ]).then((results) => {
-    results.forEach((result) => {
-      if (result.status === 'rejected') {
-        addError(result.reason?.message || 'Failed to load dashboard data', 'error')
-      }
-    })
-  })
-})
 
 function categoryColor(catName) {
   const b = budgetsStore.items.find((x) => x.category === catName || x.name === catName)

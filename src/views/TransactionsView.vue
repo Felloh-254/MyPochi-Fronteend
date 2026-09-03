@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useTransactionsStore } from '../stores/transactions'
 import { useBudgetsStore } from '../stores/budgets'
 import { useAccountsStore } from '../stores/accounts'
@@ -15,24 +15,6 @@ const ui = useUiStore()
 const { errors, addError, dismissError } = useErrorHandler()
 
 const filter = ref('all')
-
-onMounted(() => {
-  if (transactionsStore.items.length === 0) {
-    transactionsStore.fetch().catch((e) => {
-      addError(e?.message || 'Failed to load transactions', 'error')
-    }).catch(() => {})
-  }
-  if (budgetsStore.items.length === 0) {
-    budgetsStore.fetch().catch((e) => {
-      addError(e?.message || 'Failed to load budgets', 'error')
-    }).catch(() => {})
-  }
-  if (accountsStore.items.length === 0) {
-    accountsStore.fetch().catch((e) => {
-      addError(e?.message || 'Failed to load accounts', 'error')
-    }).catch(() => {})
-  }
-})
 
 const filtered = computed(() => {
   let list = transactionsStore.sorted

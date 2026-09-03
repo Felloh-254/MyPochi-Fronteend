@@ -1,7 +1,5 @@
 <script setup>
-import { onMounted } from 'vue'
 import { useAccountsStore } from '../stores/accounts'
-import { useTransactionsStore } from '../stores/transactions'
 import { useUiStore } from '../stores/ui'
 import AccountCard from '../components/AccountCard.vue'
 import NewAccountModal from '../components/NewAccountModal.vue'
@@ -11,29 +9,9 @@ import { useErrorHandler } from '../utils/useErrorHandler'
 import { ref } from 'vue'
 
 const accountsStore = useAccountsStore()
-const transactionsStore = useTransactionsStore()
 const ui = useUiStore()
 const editingAccount = ref(null)
 const { errors, addError, dismissError } = useErrorHandler()
-
-onMounted(() => {
-  if (accountsStore.items.length === 0) {
-    accountsStore.fetch().catch((e) => {
-      addError(e.message || 'Failed to load accounts', 'error', {
-        label: 'Retry',
-        handler: () => {
-          accountsStore.fetch()
-          dismissError(errors.value[0]?.id)
-        },
-      })
-    })
-  }
-  if (transactionsStore.items.length === 0) {
-    transactionsStore.fetch().catch((e) => {
-      addError(e.message || 'Failed to load transactions', 'warning')
-    })
-  }
-})
 
 function handleDelete(id) {
   accountsStore.remove(id)

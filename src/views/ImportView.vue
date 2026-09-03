@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useTransactionsStore } from '../stores/transactions'
 import { useAccountsStore } from '../stores/accounts'
 import ErrorAlert from '../components/ErrorAlert.vue'
@@ -10,14 +10,6 @@ import { formatCurrency, formatDate } from '../utils/format'
 const transactionsStore = useTransactionsStore()
 const accountsStore = useAccountsStore()
 const { errors, addError, dismissError } = useErrorHandler()
-
-onMounted(() => {
-  if (accountsStore.items.length === 0) {
-    accountsStore.fetch().catch((e) => {
-      addError(e?.message || 'Failed to load accounts', 'error')
-    }).catch(() => {})
-  }
-})
 
 const rows = ref([])
 const format = ref(null)

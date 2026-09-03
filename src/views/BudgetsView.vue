@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue'
 import { useBudgetsStore } from '../stores/budgets'
 import { useUiStore } from '../stores/ui'
 import { formatPeriodLabel, shiftPeriod, isCurrentPeriod } from '../utils/period'
@@ -14,16 +13,6 @@ import { useErrorHandler } from '../utils/useErrorHandler'
 const budgetsStore = useBudgetsStore()
 const ui = useUiStore()
 const { errors, addError, dismissError } = useErrorHandler()
-
-onMounted(() => {
-  budgetsStore.fetch(budgetsStore.period).catch((e) => {
-    addError(e?.message || 'Failed to load budgets', 'error')
-  }).catch(() => {}) // Prevent unhandled rejection
-  
-  budgetsStore.fetchHistory(6).catch(() => {
-    // Silently fail for history as it's not critical
-  })
-})
 
 function goToPreviousMonth() {
   budgetsStore.fetch(shiftPeriod(budgetsStore.period, -1))

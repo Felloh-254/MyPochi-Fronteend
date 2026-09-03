@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { api } from '../services/api'
+import { api, ApiError } from '../services/api'
 
 export const useSummaryStore = defineStore('summary', {
   state: () => ({
@@ -25,6 +25,9 @@ export const useSummaryStore = defineStore('summary', {
       } catch (e) {
         this.monthlyData = []
         this.error = e.message
+        if (e instanceof ApiError && (e.status === 401 || e.status === 403 || e.status === 404)) {
+          throw e
+        }
       } finally {
         this.loading = false
       }
