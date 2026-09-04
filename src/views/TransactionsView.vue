@@ -20,7 +20,7 @@ const filtered = computed(() => {
   let list = transactionsStore.sorted
   if (filter.value !== 'all') list = list.filter((t) => t.type === filter.value)
   const q = ui.searchQuery.trim().toLowerCase()
-  if (q) list = list.filter((t) => t.title.toLowerCase().includes(q) || t.category.toLowerCase().includes(q))
+  if (q) list = list.filter((t) => t.title.toLowerCase().includes(q) || (t.category || '').toLowerCase().includes(q))
   return list
 })
 
@@ -53,7 +53,7 @@ function accountName(accountId) {
     </div>
 
     <div class="filter-row content-enter">
-      <button v-for="f in ['all', 'income', 'expense']" :key="f" :class="{ active: filter === f }" @click="filter = f">
+      <button v-for="f in ['all', 'income', 'expense', 'transfer']" :key="f" :class="{ active: filter === f }" @click="filter = f">
         {{ f }}
       </button>
     </div>

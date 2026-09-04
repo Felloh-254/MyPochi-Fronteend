@@ -31,6 +31,7 @@ export const DEMO_TRANSACTIONS = [
   { id: 10, title: 'Cinema tickets', amount: 1400, type: 'expense', category: 'Leisure', account_id: 1, date: '2026-07-12', note: '' },
   { id: 11, title: 'Dividend — money market fund', amount: 2100, type: 'income', category: 'Investing', account_id: 4, date: '2026-07-13', note: '' },
   { id: 12, title: 'Matatu fare', amount: 800, type: 'expense', category: 'Travel', account_id: 1, date: '2026-07-14', note: 'Monthly pass' },
+  { id: 13, title: 'Transfer to savings', amount: 10000, type: 'transfer', category: '', account_id: 2, from_account_id: 2, to_account_id: 4, date: '2026-07-15', note: 'Moving to emergency fund' },
 ]
 
 export const DEMO_MONTHLY_DATA = [

@@ -7,13 +7,21 @@ const props = defineProps({
   accountName: { type: String, default: '' },
   showNote: { type: Boolean, default: false },
 })
+
+const categoryDisplay = () => {
+  // For transfers, show "Transfer" instead of category
+  if (props.transaction.type === 'transfer') {
+    return 'Transfer'
+  }
+  return props.transaction.category || '—'
+}
 </script>
 
 <template>
   <tr>
     <td class="txn-title">{{ transaction.title }}</td>
     <td>
-      <span class="txn-cat"><span class="dot" :style="{ background: categoryColor }"></span>{{ transaction.category }}</span>
+      <span class="txn-cat"><span class="dot" :style="{ background: categoryColor }"></span>{{ categoryDisplay() }}</span>
     </td>
     <td class="txn-date">{{ accountName || '—' }}</td>
     <td class="txn-date">{{ formatDate(transaction.date) }}</td>
