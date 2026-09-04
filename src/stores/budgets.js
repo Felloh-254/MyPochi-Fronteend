@@ -39,13 +39,12 @@ export const useBudgetsStore = defineStore('budgets', {
               : []
         this.items = items
       } catch (e) {
-        if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
-          this.items = []
-          this.error = e.message
-          throw e
-        }
         this.items = []
         this.error = e.message
+        if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+          throw e
+        }
+        throw e
       } finally {
         this.loading = false
       }
@@ -58,6 +57,7 @@ export const useBudgetsStore = defineStore('budgets', {
       } catch (e) {
         this.history = []
         this.error = e.message
+        // Don't throw here - history is optional, so silently fail
       } finally {
         this.historyLoading = false
       }

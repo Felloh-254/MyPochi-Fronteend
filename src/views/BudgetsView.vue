@@ -1,20 +1,18 @@
 <script setup>
-import { onMounted } from 'vue'
 import { useBudgetsStore } from '../stores/budgets'
 import { useUiStore } from '../stores/ui'
 import { formatPeriodLabel, shiftPeriod, isCurrentPeriod } from '../utils/period'
 import BudgetCard from '../components/BudgetCard.vue'
 import NewBudgetModal from '../components/NewBudgetModal.vue'
 import BudgetComparisonChart from '../components/charts/BudgetComparisonChart.vue'
+import LoadingSpinner from '../components/LoadingSpinner.vue'
+import ErrorAlert from '../components/ErrorAlert.vue'
 import Icon from '../components/Icon.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 
 const budgetsStore = useBudgetsStore()
 const ui = useUiStore()
-
-onMounted(() => {
-  budgetsStore.fetch(budgetsStore.period)
-  budgetsStore.fetchHistory(6)
-})
+const { errors, addError, dismissError } = useErrorHandler()
 
 function goToPreviousMonth() {
   budgetsStore.fetch(shiftPeriod(budgetsStore.period, -1))
@@ -30,6 +28,14 @@ function handleDelete(id) {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Budgets</h2>
@@ -38,7 +44,7 @@ function handleDelete(id) {
       <button class="btn btn-primary" @click="ui.openBudgetModal()">+ New budget</button>
     </div>
 
-    <div class="period-switcher">
+    <div class="period-switcher content-enter">
       <button class="period-arrow" @click="goToPreviousMonth" aria-label="Previous month">
         <Icon name="chevronLeft" size="16" />
       </button>
@@ -51,7 +57,7 @@ function handleDelete(id) {
       </button>
     </div>
 
-    <div v-if="!budgetsStore.loading && budgetsStore.items.length === 0" class="card empty-period">
+    <div v-if="!budgetsStore.loading && budgetsStore.items.length === 0" class="card empty-period content-enter content-enter--delay-1">
       <p>No budgets for {{ formatPeriodLabel(budgetsStore.period) }} yet.</p>
       <div class="empty-period-actions">
         <button class="btn btn-ghost" @click="budgetsStore.copyFromPreviousMonth()">Copy last month's budgets</button>
@@ -60,10 +66,10 @@ function handleDelete(id) {
     </div>
 
     <div class="budget-grid" v-else>
-      <BudgetCard v-for="b in budgetsStore.items" :key="b.id" :budget="b" @delete="handleDelete" />
+      <BudgetCard v-for="b in budgetsStore.items" :key="b.id" :budget="b" class="card-grid-enter-active" @delete="handleDelete" />
     </div>
 
-    <div class="card">
+    <div class="card chart-enter-active">
       <div class="card-head">
         <h3>Monthly comparison</h3>
         <span class="eyebrow">Budgeted vs. spent, last 6 months</span>

@@ -1,21 +1,17 @@
 <script setup>
-import { onMounted } from 'vue'
 import { useAccountsStore } from '../stores/accounts'
-import { useTransactionsStore } from '../stores/transactions'
 import { useUiStore } from '../stores/ui'
 import AccountCard from '../components/AccountCard.vue'
 import NewAccountModal from '../components/NewAccountModal.vue'
+import LoadingSpinner from '../components/LoadingSpinner.vue'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import { ref } from 'vue'
 
 const accountsStore = useAccountsStore()
-const transactionsStore = useTransactionsStore()
 const ui = useUiStore()
 const editingAccount = ref(null)
-
-onMounted(() => {
-  if (accountsStore.items.length === 0) accountsStore.fetch()
-  if (transactionsStore.items.length === 0) transactionsStore.fetch()
-})
+const { errors, addError, dismissError } = useErrorHandler()
 
 function handleDelete(id) {
   accountsStore.remove(id)
@@ -38,6 +34,15 @@ function closeAccountModal() {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      :action="error.action"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Accounts</h2>
@@ -46,8 +51,17 @@ function closeAccountModal() {
       <button class="btn btn-primary" @click="openNewAccount">+ New account</button>
     </div>
 
-    <div class="account-grid">
-      <AccountCard v-for="a in accountsStore.items" :key="a.id" :account="a" @delete="handleDelete" @edit="openEditAccount" />
+    <LoadingSpinner v-if="accountsStore.loading" label="Loading your accounts..." />
+
+    <div v-show="!accountsStore.loading" class="account-grid">
+      <AccountCard
+        v-for="a in accountsStore.items"
+        :key="a.id"
+        :account="a"
+        class="card-grid-enter-active"
+        @delete="handleDelete"
+        @edit="openEditAccount"
+      />
     </div>
 
     <p v-if="!accountsStore.loading && accountsStore.items.length === 0" class="empty">
@@ -65,6 +79,7 @@ function closeAccountModal() {
   gap: 22px;
   max-width: 1180px;
 }
+
 .demo-banner {
   background: #fff7e6;
   border: 1px solid #f5d99a;
@@ -73,9 +88,50 @@ function closeAccountModal() {
   padding: 10px 14px;
   border-radius: 9px;
 }
+
 .account-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
+}
+
+.account-grid .card-grid-enter-active {
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.account-grid .card-grid-enter-active:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.account-grid .card-grid-enter-active:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.account-grid .card-grid-enter-active:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.account-grid .card-grid-enter-active:nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+.account-grid .card-grid-enter-active:nth-child(5) {
+  animation-delay: 0.32s;
+}
+
+.account-grid .card-grid-enter-active:nth-child(6) {
+  animation-delay: 0.4s;
+}
+
+.account-grid .card-grid-enter-active:nth-child(n + 7) {
+  animation-delay: 0.48s;
+}
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-soft);
+  font-size: 15px;
+  animation: fadeIn 0.3s ease-out;
 }
 </style>

@@ -13,8 +13,15 @@ export const useUiStore = defineStore('ui', {
     contributeGoalId: null,
     notificationsPanelOpen: false,
     searchQuery: '',
+    routeDataError: null,
   }),
   actions: {
+    setRouteDataError(error) {
+      this.routeDataError = error
+    },
+    clearRouteDataError() {
+      this.routeDataError = null
+    },
     openTxnModal() {
       this.txnModalOpen = true
     },

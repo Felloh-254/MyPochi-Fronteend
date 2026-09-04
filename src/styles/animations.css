@@ -1,0 +1,201 @@
+/* Card entry animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageExit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Staggered animations for card grids */
+.card-list-enter-active,
+.card-grid-enter-active {
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.card-list-enter-active:nth-child(1),
+.card-grid-enter-active:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.card-list-enter-active:nth-child(2),
+.card-grid-enter-active:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.card-list-enter-active:nth-child(3),
+.card-grid-enter-active:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.card-list-enter-active:nth-child(4),
+.card-grid-enter-active:nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+.card-list-enter-active:nth-child(5),
+.card-grid-enter-active:nth-child(5) {
+  animation-delay: 0.32s;
+}
+
+.card-list-enter-active:nth-child(6),
+.card-grid-enter-active:nth-child(6) {
+  animation-delay: 0.4s;
+}
+
+.card-list-enter-active:nth-child(n + 7),
+.card-grid-enter-active:nth-child(n + 7) {
+  animation-delay: 0.48s;
+}
+
+/* Section header animations */
+.section-head {
+  animation: slideInRight 0.4s ease-out both;
+}
+
+/* Page transition animations */
+.page-enter-active {
+  animation: pageEnter 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.page-leave-active {
+  animation: pageExit 0.16s ease-in both;
+}
+
+/* Stat card animations */
+.stat-card-enter-active {
+  animation: fadeInScale 0.4s ease-out both;
+}
+
+.stat-card-enter-active:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.stat-card-enter-active:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.stat-card-enter-active:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* Chart animations */
+.chart-enter-active {
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+/* General-purpose content entrances for page sections. */
+.content-enter {
+  animation: fadeInUp 0.42s ease-out both;
+}
+
+.content-enter--delay-1 {
+  animation-delay: 0.08s;
+}
+
+.content-enter--delay-2 {
+  animation-delay: 0.16s;
+}
+
+.table-row-enter-active {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+.table-row-enter-active:nth-child(1) { animation-delay: 0.04s; }
+.table-row-enter-active:nth-child(2) { animation-delay: 0.07s; }
+.table-row-enter-active:nth-child(3) { animation-delay: 0.1s; }
+.table-row-enter-active:nth-child(4) { animation-delay: 0.13s; }
+.table-row-enter-active:nth-child(5) { animation-delay: 0.16s; }
+.table-row-enter-active:nth-child(n + 6) { animation-delay: 0.19s; }
+
+/* Pulse animation for loading state indicators */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Skeleton loading animation */
+@keyframes shimmer {
+  -100% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.skeleton-loading {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    90deg,
+    var(--line) 0%,
+    var(--canvas) 50%,
+    var(--line) 100%
+  );
+  background-size: 200% 100%;
+}

@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue'
 import { useBudgetsStore } from '../stores/budgets'
 import { useTransactionsStore } from '../stores/transactions'
 import { useSummaryStore } from '../stores/summary'
@@ -11,19 +10,16 @@ import BudgetProgressRow from '../components/BudgetProgressRow.vue'
 import TransactionRow from '../components/TransactionRow.vue'
 import CashFlowChart from '../components/charts/CashFlowChart.vue'
 import CategoryDonutChart from '../components/charts/CategoryDonutChart.vue'
+import LoadingSpinner from '../components/LoadingSpinner.vue'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 
 const budgetsStore = useBudgetsStore()
 const transactionsStore = useTransactionsStore()
 const summaryStore = useSummaryStore()
 const accountsStore = useAccountsStore()
 const ui = useUiStore()
-
-onMounted(() => {
-  budgetsStore.fetch()
-  transactionsStore.fetch()
-  summaryStore.fetch()
-  accountsStore.fetch()
-})
+const { errors, addError, dismissError } = useErrorHandler()
 
 function categoryColor(catName) {
   const b = budgetsStore.items.find((x) => x.category === catName || x.name === catName)
@@ -37,6 +33,14 @@ function accountName(accountId) {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Dashboard</h2>
@@ -44,26 +48,39 @@ function accountName(accountId) {
       </div>
     </div>
 
-    <div class="hero-row">
+    <LoadingSpinner v-if="accountsStore.loading || budgetsStore.loading || summaryStore.loading" label="Loading dashboard..." />
+
+    <div v-show="!accountsStore.loading" class="hero-row">
       <StatCard
+        class="stat-card-enter-active"
         variant="hero"
         label="Total balance"
         :value="accountsStore.totalBalance"
         :delta="(transactionsStore.balance >= 0 ? '↑ ' : '↓ ') + formatCurrency(Math.abs(transactionsStore.balance)) + ' net this month'"
       />
-      <StatCard variant="positive" label="Income this month" :value="transactionsStore.totalIncome" />
-      <StatCard variant="negative" label="Expenses this month" :value="transactionsStore.totalExpenses" />
+      <StatCard
+        class="stat-card-enter-active"
+        variant="positive"
+        label="Income this month"
+        :value="transactionsStore.totalIncome"
+      />
+      <StatCard
+        class="stat-card-enter-active"
+        variant="negative"
+        label="Expenses this month"
+        :value="transactionsStore.totalExpenses"
+      />
     </div>
 
-    <div class="grid-2">
-      <div class="card chart-card">
+    <div v-show="!budgetsStore.loading && !summaryStore.loading" class="grid-2">
+      <div class="card chart-card chart-enter-active">
         <div class="card-head">
           <h3>Cash flow</h3>
           <span class="eyebrow">Last 6 months</span>
         </div>
         <CashFlowChart :monthly-data="summaryStore.monthlyData" />
       </div>
-      <div class="card chart-card">
+      <div class="card chart-card chart-enter-active">
         <div class="card-head">
           <h3>Where it goes</h3>
           <span class="eyebrow">By category</span>
@@ -79,7 +96,7 @@ function accountName(accountId) {
       </div>
     </div>
 
-    <div class="card">
+    <div v-show="!accountsStore.loading" class="card content-enter">
       <div class="card-head">
         <h3>Accounts</h3>
         <router-link class="link-btn" to="/accounts">View all</router-link>
@@ -93,7 +110,7 @@ function accountName(accountId) {
       </ul>
     </div>
 
-    <div class="card">
+    <div v-show="!budgetsStore.loading" class="card content-enter content-enter--delay-1">
       <div class="card-head">
         <h3>Budgets</h3>
         <router-link class="link-btn" to="/budgets">View all</router-link>
@@ -103,7 +120,7 @@ function accountName(accountId) {
       </div>
     </div>
 
-    <div class="card">
+    <div v-show="!transactionsStore.loading" class="card content-enter content-enter--delay-2">
       <div class="card-head">
         <h3>Recent transactions</h3>
         <router-link class="link-btn" to="/transactions">View all</router-link>
@@ -169,6 +186,23 @@ function accountName(accountId) {
   grid-template-columns: 1.3fr 1fr 1fr;
   gap: 18px;
 }
+
+.hero-row .stat-card-enter-active {
+  animation: fadeInScale 0.4s ease-out both;
+}
+
+.hero-row .stat-card-enter-active:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.hero-row .stat-card-enter-active:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.hero-row .stat-card-enter-active:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
 .grid-2 {
   display: grid;
   grid-template-columns: 1.4fr 1fr;

@@ -1,19 +1,16 @@
 <script setup>
-import { onMounted } from 'vue'
 import { useRecurringStore } from '../stores/recurring'
 import { useAccountsStore } from '../stores/accounts'
 import { useUiStore } from '../stores/ui'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import RecurringRow from '../components/RecurringRow.vue'
 import NewRecurringModal from '../components/NewRecurringModal.vue'
 
 const recurringStore = useRecurringStore()
 const accountsStore = useAccountsStore()
 const ui = useUiStore()
-
-onMounted(() => {
-  if (recurringStore.items.length === 0) recurringStore.fetch()
-  if (accountsStore.items.length === 0) accountsStore.fetch()
-})
+const { errors, addError, dismissError } = useErrorHandler()
 
 function accountName(accountId) {
   return accountsStore.items.find((a) => a.id === accountId)?.name ?? ''
@@ -22,6 +19,14 @@ function accountName(accountId) {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Recurring</h2>
@@ -30,7 +35,7 @@ function accountName(accountId) {
       <button class="btn btn-primary" @click="ui.openRecurringModal()">+ New recurring</button>
     </div>
 
-    <div class="card" style="padding: 8px 22px 22px" v-if="recurringStore.items.length">
+    <div class="card content-enter" style="padding: 8px 22px 22px" v-if="recurringStore.items.length">
       <table class="txn-table">
         <thead>
           <tr>
@@ -49,12 +54,13 @@ function accountName(accountId) {
             :key="r.id"
             :item="r"
             :account-name="accountName(r.account_id)"
+            class="table-row-enter-active"
           />
         </tbody>
       </table>
     </div>
 
-    <p v-else class="empty">
+    <p v-else class="empty content-enter">
       Nothing recurring yet. Add rent, salary, or a subscription to have it post automatically.
     </p>
   </div>

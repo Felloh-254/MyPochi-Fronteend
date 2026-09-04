@@ -1,20 +1,17 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useTransactionsStore } from '../stores/transactions'
 import { useAccountsStore } from '../stores/accounts'
 import { useBudgetsStore } from '../stores/budgets'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import { formatCurrency, formatDate } from '../utils/format'
 import { transactionsToCsv, downloadCsv } from '../utils/csvExport'
 
 const transactionsStore = useTransactionsStore()
 const accountsStore = useAccountsStore()
 const budgetsStore = useBudgetsStore()
-
-onMounted(() => {
-  if (transactionsStore.items.length === 0) transactionsStore.fetch()
-  if (accountsStore.items.length === 0) accountsStore.fetch()
-  if (budgetsStore.items.length === 0) budgetsStore.fetch()
-})
+const { errors, addError, dismissError } = useErrorHandler()
 
 const today = new Date().toISOString().slice(0, 10)
 const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
@@ -46,6 +43,14 @@ function printReport() {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head no-print">
       <div>
         <h2>Reports</h2>
@@ -57,7 +62,7 @@ function printReport() {
       </div>
     </div>
 
-    <div class="card date-range no-print">
+    <div class="card date-range no-print content-enter">
       <div class="field">
         <label>From</label>
         <input v-model="from" type="date" />
@@ -68,7 +73,7 @@ function printReport() {
       </div>
     </div>
 
-    <div class="card printable">
+    <div class="card printable content-enter content-enter--delay-1">
       <h2 class="report-title">MyPochi — Financial report</h2>
       <p class="report-range">{{ formatDate(from) }} – {{ formatDate(to) }}</p>
 
@@ -98,7 +103,7 @@ function printReport() {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="t in inRange" :key="t.id">
+          <tr v-for="t in inRange" :key="t.id" class="table-row-enter-active">
             <td class="txn-date">{{ formatDate(t.date) }}</td>
             <td class="txn-title">{{ t.title }}</td>
             <td class="txn-date">{{ t.category }}</td>

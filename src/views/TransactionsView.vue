@@ -1,23 +1,20 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useTransactionsStore } from '../stores/transactions'
 import { useBudgetsStore } from '../stores/budgets'
 import { useAccountsStore } from '../stores/accounts'
 import { useUiStore } from '../stores/ui'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import TransactionRow from '../components/TransactionRow.vue'
 
 const transactionsStore = useTransactionsStore()
 const budgetsStore = useBudgetsStore()
 const accountsStore = useAccountsStore()
 const ui = useUiStore()
+const { errors, addError, dismissError } = useErrorHandler()
 
 const filter = ref('all')
-
-onMounted(() => {
-  if (transactionsStore.items.length === 0) transactionsStore.fetch()
-  if (budgetsStore.items.length === 0) budgetsStore.fetch()
-  if (accountsStore.items.length === 0) accountsStore.fetch()
-})
 
 const filtered = computed(() => {
   let list = transactionsStore.sorted
@@ -39,6 +36,14 @@ function accountName(accountId) {
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Transactions</h2>
@@ -47,13 +52,13 @@ function accountName(accountId) {
       <button class="btn btn-primary" @click="ui.openTxnModal()">+ Add transaction</button>
     </div>
 
-    <div class="filter-row">
+    <div class="filter-row content-enter">
       <button v-for="f in ['all', 'income', 'expense']" :key="f" :class="{ active: filter === f }" @click="filter = f">
         {{ f }}
       </button>
     </div>
 
-    <div class="card" style="padding: 8px 22px 22px">
+    <div class="card content-enter content-enter--delay-1" style="padding: 8px 22px 22px">
       <table class="txn-table" v-if="filtered.length">
         <thead>
           <tr>
@@ -73,6 +78,7 @@ function accountName(accountId) {
             :category-color="categoryColor(t.category)"
             :account-name="accountName(t.account_id)"
             show-note
+            class="table-row-enter-active"
           />
         </tbody>
       </table>

@@ -1,21 +1,28 @@
 <script setup>
-import { onMounted } from 'vue'
 import { useGoalsStore } from '../stores/goals'
 import { useUiStore } from '../stores/ui'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import GoalCard from '../components/GoalCard.vue'
 import NewGoalModal from '../components/NewGoalModal.vue'
 import ContributeGoalModal from '../components/ContributeGoalModal.vue'
 
 const goalsStore = useGoalsStore()
 const ui = useUiStore()
+const { errors, addError, dismissError } = useErrorHandler()
 
-onMounted(() => {
-  if (goalsStore.items.length === 0) goalsStore.fetch()
-})
 </script>
 
 <template>
   <div class="view">
+    <ErrorAlert
+      v-for="error in errors"
+      :key="error.id"
+      :message="error.message"
+      :type="error.type"
+      @dismiss="dismissError(error.id)"
+    />
+
     <div class="section-head">
       <div>
         <h2>Goals</h2>
@@ -25,10 +32,10 @@ onMounted(() => {
     </div>
 
     <div class="goal-grid" v-if="goalsStore.items.length">
-      <GoalCard v-for="g in goalsStore.items" :key="g.id" :goal="g" />
+      <GoalCard v-for="g in goalsStore.items" :key="g.id" :goal="g" class="card-grid-enter-active" />
     </div>
 
-    <p v-else class="empty">No goals yet. Set a target and start chipping away at it.</p>
+    <p v-else class="empty content-enter">No goals yet. Set a target and start chipping away at it.</p>
   </div>
 
   <NewGoalModal v-if="ui.goalModalOpen" />
