@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, ref } from 'vue'
+import { reactive, computed, ref, watch } from 'vue'
 import { useAccountsStore } from '../stores/accounts'
 import { useUiStore } from '../stores/ui'
 import { ACCOUNT_TYPES } from '../utils/accountTypes'
@@ -18,11 +18,26 @@ function emptyForm(account = null) {
   return {
     name: account?.name || '',
     type: account?.type || 'bank',
-    bank: account?.bank || '',
+    bank: bankValue(account),
     account_number: account?.account_number || '',
     balance: account?.balance ?? account?.starting_balance ?? null,
     currency: account?.currency || 'KES',
   }
+}
+
+function bankValue(account) {
+  if (!account) return ''
+
+  const bankText = String(account.bank || account.name || '').trim().toLowerCase()
+  if (!bankText) return ''
+
+  const bank = BANKS.find(
+    (item) =>
+      item.value === bankText ||
+      item.label.toLowerCase() === bankText ||
+      item.matches.some((match) => bankText.includes(match)),
+  )
+  return bank?.value || ''
 }
 
 const form = reactive(emptyForm(props.account))
@@ -39,6 +54,15 @@ const filteredCurrencies = computed(() => {
     (currency) => currency.code.toLowerCase().includes(query) || currency.name.toLowerCase().includes(query),
   )
 })
+
+watch(
+  () => props.account,
+  (account) => {
+    Object.assign(form, emptyForm(account))
+    currencyQuery.value = ''
+    currencyOpen.value = false
+  },
+)
 
 function selectedCurrency() {
   return CURRENCIES.find((currency) => currency.code === form.currency)

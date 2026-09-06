@@ -97,12 +97,16 @@ export const api = {
   }),
 
   getTransactions: (query = '') => request(`/api/transactions${query}`),
-  createTransaction: (payload) => request('/api/transactions', { 
+  createIncome: (payload) => request('/api/transactions/income', { 
     method: 'POST', 
     body: payload 
   }),
-  updateTransaction: (id, payload) => request(`/api/transactions/${id}`, { 
-    method: 'PUT', 
+  createExpense: (payload) => request('/api/transactions/expense', { 
+    method: 'POST', 
+    body: payload 
+  }),
+  createTransfer: (payload) => request('/api/transactions/transfer', { 
+    method: 'POST', 
     body: payload 
   }),
   deleteTransaction: (id) => request(`/api/transactions/${id}`, { 
