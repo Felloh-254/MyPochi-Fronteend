@@ -86,30 +86,39 @@ export const useTransactionsStore = defineStore('transactions', {
     },
 
     async create(payload) {
-      const { type, ...rest } = payload
-      const idempotencyKey = crypto.randomUUID()
-      
-      let created
-      if (type === 'income') {
-        created = await api.createIncome({ ...rest, idempotency_key: idempotencyKey })
-      } else if (type === 'expense') {
-        created = await api.createExpense({ ...rest, idempotency_key: idempotencyKey })
-      } else if (type === 'transfer') {
-        created = await api.createTransfer({ ...rest, idempotency_key: idempotencyKey })
-      } else {
-        throw new ApiError('Unknown transaction type', 400)
+      this.loading = true
+      this.error = null
+      try {
+        const { type, ...rest } = payload
+        const idempotencyKey = crypto.randomUUID()
+
+        let created
+        if (type === 'income') {
+          created = await api.createIncome({ ...rest, idempotency_key: idempotencyKey })
+        } else if (type === 'expense') {
+          created = await api.createExpense({ ...rest, idempotency_key: idempotencyKey })
+        } else if (type === 'transfer') {
+          created = await api.createTransfer({ ...rest, idempotency_key: idempotencyKey })
+        } else {
+          throw new ApiError('Unknown transaction type', 400)
+        }
+
+        // Enrich the response with convenience fields for UI compatibility
+        const enriched = {
+          ...created,
+          account_id: created.entries?.[0]?.account_id ?? null,
+          amount: Math.abs(created.entries?.[0]?.amount ?? 0),
+          category: created.categories && created.categories.length > 0 ? created.categories[0].name : '',
+        }
+
+        this.items.unshift(enriched)
+        return enriched
+      } catch (e) {
+        this.error = e.message
+        throw e
+      } finally {
+        this.loading = false
       }
-      
-      // Enrich the response with convenience fields for UI compatibility
-      const enriched = {
-        ...created,
-        account_id: created.entries?.[0]?.account_id ?? null,
-        amount: Math.abs(created.entries?.[0]?.amount ?? 0),
-        category: created.categories && created.categories.length > 0 ? created.categories[0].name : '',
-      }
-      
-      this.items.unshift(enriched)
-      return enriched
     },
 
     async remove(id) {

@@ -1,10 +1,11 @@
 <script setup>
-import { reactive, computed, onMounted, watch } from 'vue'
+import { reactive, computed, ref, onMounted, watch } from 'vue'
 import { useTransactionsStore } from '../stores/transactions'
 import { useBudgetsStore } from '../stores/budgets'
 import { useAccountsStore } from '../stores/accounts'
 import { useUiStore } from '../stores/ui'
 import BaseModal from './BaseModal.vue'
+import Icon from './Icon.vue'
 
 const transactionsStore = useTransactionsStore()
 const budgetsStore = useBudgetsStore()
@@ -43,8 +44,20 @@ function emptyForm() {
 }
 
 const form = reactive(emptyForm())
-const submitting = computed(() => transactionsStore.loading)
 const error = computed(() => transactionsStore.error)
+
+// Local, synchronous submission state. We don't rely solely on
+// transactionsStore.loading here: that flag is only as fast as the store's
+// own reactivity, and a fast double-click can slip through the gap before
+// it flips. Setting this ref at the very top of submit(), before any
+// await, closes that gap completely.
+const status = ref('idle') // 'idle' | 'submitting' | 'success'
+const isBusy = computed(() => status.value !== 'idle')
+const statusMessage = computed(() => {
+  if (status.value === 'submitting') return 'Saving transaction…'
+  if (status.value === 'success') return 'Transaction saved'
+  return ''
+})
 
 const categorySuggestions = computed(() => {
   const fromBudgets = budgetsStore.items.map((b) => b.category)
@@ -53,10 +66,18 @@ const categorySuggestions = computed(() => {
 })
 
 function close() {
+  if (isBusy.value) return
   ui.txnModalOpen = false
 }
 
 async function submit() {
+  // Guard clause: if a submission is already in flight (or just
+  // succeeded), ignore any further clicks/Enter-presses until this one
+  // finishes. This check happens synchronously, before any network call,
+  // so a rapid double-click can never queue two requests.
+  if (isBusy.value) return
+  status.value = 'submitting'
+
   try {
     const payload = form.tab === 'transfer'
       ? {
@@ -79,18 +100,28 @@ async function submit() {
         }
 
     await transactionsStore.create(payload)
-    Object.assign(form, emptyForm())
-    close()
+
+    // Brief success confirmation so the person can see the save actually
+    // went through, then close and reset for next time.
+    status.value = 'success'
+    setTimeout(() => {
+      Object.assign(form, emptyForm())
+      status.value = 'idle'
+      ui.txnModalOpen = false
+    }, 500)
   } catch (e) {
     // error already captured on the store; keep the modal open so the
     // person can fix the input rather than losing what they typed
+    status.value = 'idle'
   }
 }
 </script>
 
 <template>
-  <BaseModal title="Add transaction" @close="close">
+  <BaseModal title="Add transaction" :prevent-close="isBusy" @close="close">
     <form @submit.prevent="submit">
+      <p class="sr-only" role="status" aria-live="polite">{{ statusMessage }}</p>
+      <fieldset class="txn-fieldset" :disabled="isBusy">
       <div class="tab-toggle">
         <button 
           type="button" 
@@ -202,10 +233,13 @@ async function submit() {
 
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" @click="close">Cancel</button>
-        <button type="submit" class="btn btn-primary" :disabled="submitting">
-          {{ submitting ? 'Saving…' : 'Save transaction' }}
+        <button type="submit" class="btn btn-primary btn-submit" :aria-busy="status === 'submitting'">
+          <span v-if="status === 'submitting'" class="btn-spinner" aria-hidden="true"></span>
+          <Icon v-else-if="status === 'success'" name="check" size="15" />
+          <span>{{ status === 'submitting' ? 'Saving…' : status === 'success' ? 'Saved' : 'Save transaction' }}</span>
         </button>
       </div>
+      </fieldset>
     </form>
   </BaseModal>
 </template>
@@ -256,5 +290,61 @@ async function submit() {
 .type-toggle button.active.income {
   background: var(--mint-soft);
   color: var(--mint);
+}
+
+/* Reset native fieldset chrome so disabling the form during submit
+   doesn't change its look, only its interactivity. */
+.txn-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.txn-fieldset:disabled .field input,
+.txn-fieldset:disabled .field select,
+.txn-fieldset:disabled .tab-btn,
+.txn-fieldset:disabled .type-toggle button {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 148px;
+}
+.btn-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.btn-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: btn-spin 0.6s linear infinite;
+  opacity: 0.85;
+}
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>

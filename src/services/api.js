@@ -8,11 +8,14 @@ export class ApiError extends Error {
   }
 }
 
-async function request(path, { method = 'GET', body, auth = true } = {}) {
+async function request(path, { method = 'GET', body, auth = true, idempotencyKey } = {}) {
   const headers = { 'Content-Type': 'application/json' }
   if (auth) {
     const token = localStorage.getItem('mypochi_token')
     if (token) headers.Authorization = `Bearer ${token}`
+  }
+  if (idempotencyKey) {
+    headers['Idempotency-Key'] = idempotencyKey
   }
 
   let res
@@ -97,17 +100,20 @@ export const api = {
   }),
 
   getTransactions: (query = '') => request(`/api/transactions${query}`),
-  createIncome: (payload) => request('/api/transactions/income', { 
-    method: 'POST', 
-    body: payload 
+  createIncome: ({ idempotency_key, ...body } = {}) => request('/api/transactions/income', {
+    method: 'POST',
+    body,
+    idempotencyKey: idempotency_key,
   }),
-  createExpense: (payload) => request('/api/transactions/expense', { 
-    method: 'POST', 
-    body: payload 
+  createExpense: ({ idempotency_key, ...body } = {}) => request('/api/transactions/expense', {
+    method: 'POST',
+    body,
+    idempotencyKey: idempotency_key,
   }),
-  createTransfer: (payload) => request('/api/transactions/transfer', { 
-    method: 'POST', 
-    body: payload 
+  createTransfer: ({ idempotency_key, ...body } = {}) => request('/api/transactions/transfer', {
+    method: 'POST',
+    body,
+    idempotencyKey: idempotency_key,
   }),
   deleteTransaction: (id) => request(`/api/transactions/${id}`, { 
     method: 'DELETE' 

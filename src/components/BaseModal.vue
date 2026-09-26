@@ -1,18 +1,26 @@
 <script setup>
 import Icon from './Icon.vue'
 
-defineProps({
+const props = defineProps({
   title: { type: String, required: true },
+  // Block backdrop-click and the ✕ button from closing the modal — used
+  // while a request is in flight so a stray click can't discard it.
+  preventClose: { type: Boolean, default: false },
 })
 const emit = defineEmits(['close'])
+
+function requestClose() {
+  if (props.preventClose) return
+  emit('close')
+}
 </script>
 
 <template>
-  <div class="modal-overlay" @click.self="emit('close')">
+  <div class="modal-overlay" @click.self="requestClose">
     <div class="modal" role="dialog" aria-modal="true" :aria-label="title">
       <div class="modal-head">
         <h3>{{ title }}</h3>
-        <button class="icon-btn" @click="emit('close')" aria-label="Close">
+        <button class="icon-btn" @click="requestClose" :disabled="preventClose" aria-label="Close">
           <Icon name="close" size="16" />
         </button>
       </div>
@@ -85,6 +93,15 @@ const emit = defineEmits(['close'])
   background: var(--rose-soft);
   border-color: transparent;
   color: var(--rose);
+}
+.icon-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.icon-btn:disabled:hover {
+  background: var(--canvas);
+  border-color: var(--line);
+  color: var(--text-faint);
 }
 @keyframes modal-in {
   from {
