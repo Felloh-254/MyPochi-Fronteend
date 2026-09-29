@@ -9,16 +9,18 @@ import LoadingSpinner from '../components/LoadingSpinner.vue'
 import ErrorAlert from '../components/ErrorAlert.vue'
 import Icon from '../components/Icon.vue'
 import { useErrorHandler } from '../utils/useErrorHandler'
+import { useSummaryStore } from '../stores/summary'
 
+const summaryStore = useSummaryStore()
 const budgetsStore = useBudgetsStore()
 const ui = useUiStore()
 const { errors, addError, dismissError } = useErrorHandler()
 
 function goToPreviousMonth() {
-  budgetsStore.fetch(shiftPeriod(budgetsStore.period, -1))
+  budgetsStore.fetch(shiftPeriod(budgetsStore.month, -1))
 }
 function goToNextMonth() {
-  budgetsStore.fetch(shiftPeriod(budgetsStore.period, 1))
+  budgetsStore.fetch(shiftPeriod(budgetsStore.month, 1))
 }
 
 function handleDelete(id) {
@@ -49,8 +51,8 @@ function handleDelete(id) {
         <Icon name="chevronLeft" size="16" />
       </button>
       <span class="period-label">
-        {{ formatPeriodLabel(budgetsStore.period) }}
-        <span v-if="isCurrentPeriod(budgetsStore.period)" class="period-tag">Current</span>
+        {{ formatPeriodLabel(budgetsStore.month) }}
+        <span v-if="isCurrentPeriod(budgetsStore.month)" class="period-tag">Current</span>
       </span>
       <button class="period-arrow" @click="goToNextMonth" aria-label="Next month">
         <Icon name="chevronRight" size="16" />
@@ -58,7 +60,7 @@ function handleDelete(id) {
     </div>
 
     <div v-if="!budgetsStore.loading && budgetsStore.items.length === 0" class="card empty-period content-enter content-enter--delay-1">
-      <p>No budgets for {{ formatPeriodLabel(budgetsStore.period) }} yet.</p>
+      <p>No budgets for {{ formatPeriodLabel(budgetsStore.month) }} yet.</p>
       <div class="empty-period-actions">
         <button class="btn btn-ghost" @click="budgetsStore.copyFromPreviousMonth()">Copy last month's budgets</button>
         <button class="btn btn-primary" @click="ui.openBudgetModal()">+ New budget</button>
@@ -74,7 +76,7 @@ function handleDelete(id) {
         <h3>Monthly comparison</h3>
         <span class="eyebrow">Budgeted vs. spent, last 6 months</span>
       </div>
-      <BudgetComparisonChart :history="budgetsStore.history" />
+      <BudgetComparisonChart :history="summaryStore.monthlyData" />
     </div>
   </div>
 

@@ -68,7 +68,7 @@ export const api = {
   }),
   me: () => request('/api/me'),
 
-  getBudgets: (period) => request(`/api/budgets${period ? `?period=${period}` : ''}`),
+  getBudgets: (month) => request(`/api/budgets${month ? `?month=${month}` : ''}`),
   createBudget: (payload) => request('/api/budgets', {
     method: 'POST',
     body: payload
@@ -80,10 +80,10 @@ export const api = {
   deleteBudget: (id) => request(`/api/budgets/${id}`, {
     method: 'DELETE'
   }),
-  getBudgetHistory: (months = 6) => request(`/api/budgets/history?months=${months}`),
-  copyBudgets: (fromPeriod, toPeriod) => request('/api/budgets/copy', {
+  // getBudgetHistory: (months = 6) => request(`/api/budgets/history?months=${months}`),
+  copyBudgets: (month) => request('/api/budgets/copy', {
     method: 'POST',
-    body: { from_period: fromPeriod, to_period: toPeriod }
+    body: { month }
   }),
 
   getAccounts: () => request('/api/accounts'),
