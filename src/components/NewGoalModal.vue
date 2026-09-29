@@ -52,7 +52,7 @@ async function submit() {
         </div>
         <div class="field">
           <label>Deadline</label>
-          <input v-model="form.deadline" type="date" required />
+          <input v-model="form.target_date" type="date" required />
         </div>
       </div>
 

@@ -49,7 +49,7 @@ const complete = computed(() => isGoalComplete(props.goal))
       <div class="goal-amounts">
         <span class="mono">{{ formatCurrency(goal.current_amount) }}</span>
         <span class="text-faint">of {{ formatCurrency(goal.target_amount) }}</span>
-        <span class="deadline">{{ deadlineLabel(goal.deadline) }}</span>
+        <span class="deadline">{{ deadlineLabel(goal.target_date) }}</span>
       </div>
     </div>
 
