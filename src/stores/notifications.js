@@ -28,23 +28,31 @@ export const useNotificationsStore = defineStore('notifications', {
       }
 
       for (const r of recurring.items) {
-        if (!r.is_active) continue
-        const days = Math.round((new Date(r.next_run) - new Date().setHours(0, 0, 0, 0)) / 86400000)
+        if (!r.active) continue
+        const days = Math.round(
+          (new Date(r.next_run_at) - new Date().setHours(0, 0, 0, 0)) / 86400000,
+        )
         if (days <= 3) {
           list.push({
             id: `recurring-${r.id}`,
-            severity: isOverdue(r.next_run) ? 'danger' : 'info',
+            severity: isOverdue(r.next_run_at) ? 'danger' : 'info',
             icon: 'repeat',
-            text: `${r.title} — ${relativeDueLabel(r.next_run)}`,
+            text: `${r.title} — ${relativeDueLabel(r.next_run_at)}`,
           })
         }
       }
 
       for (const g of goals.items) {
-        const days = daysRemaining(g.deadline)
+        if (!g.target_date) continue
+        const days = daysRemaining(g.target_date)
         const pct = goalPct(g)
         if (pct < 100 && days <= 14 && days >= 0) {
-          list.push({ id: `goal-${g.id}`, severity: days <= 3 ? 'danger' : 'warning', icon: 'budgets', text: `${g.name} deadline in ${days} days — ${pct}% funded` })
+          list.push({
+            id: `goal-${g.id}`,
+            severity: days <= 3 ? 'danger' : 'warning',
+            icon: 'budgets',
+            text: `${g.name} deadline in ${days} days — ${pct}% funded`,
+          })
         }
       }
 
