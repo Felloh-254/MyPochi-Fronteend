@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
 import { api, ApiError } from '../services/api'
-import { advanceDate } from '../utils/recurring'
-import { useTransactionsStore } from './transactions'
 
 export const useRecurringStore = defineStore('recurring', {
   state: () => ({
@@ -11,15 +9,13 @@ export const useRecurringStore = defineStore('recurring', {
   }),
 
   getters: {
-    active: (state) => {
-      const items = Array.isArray(state.items) ? state.items : []
-      return items.filter((r) => r.is_active)
-    },
+    active: (state) => state.items.filter((r) => r.active),
     dueSoon: (state) => {
-      const items = Array.isArray(state.items) ? state.items : []
       const in7Days = new Date()
       in7Days.setDate(in7Days.getDate() + 7)
-      return items.filter((r) => r.is_active && new Date(r.next_run) <= in7Days)
+      return state.items.filter(
+        (r) => r.active && new Date(r.next_run_at) <= in7Days,
+      )
     },
   },
 
@@ -29,14 +25,7 @@ export const useRecurringStore = defineStore('recurring', {
       this.error = null
       try {
         const payload = await api.getRecurring()
-        const items = Array.isArray(payload)
-          ? payload
-          : Array.isArray(payload?.items)
-            ? payload.items
-            : Array.isArray(payload?.recurring)
-              ? payload.recurring
-              : []
-        this.items = items
+        this.items = Array.isArray(payload) ? payload : (payload?.items ?? [])
       } catch (e) {
         this.items = []
         this.error = e.message
@@ -55,16 +44,44 @@ export const useRecurringStore = defineStore('recurring', {
       return created
     },
 
+    // Backend PUT expects the full rule body. Merge with the current item
+    // so callers can pass partial patches like { amount: 12.99 }.
     async update(id, payload) {
-      const updated = await api.updateRecurring(id, payload)
+      const current = this.items.find((r) => r.id === id)
+      if (!current) return null
+      const body = {
+        type: current.type,
+        title: current.title,
+        amount: current.amount,
+        note: current.note ?? '',
+        category: current.category ?? '',
+        account_id: current.account_id ?? 0,
+        from_account_id: current.from_account_id ?? 0,
+        to_account_id: current.to_account_id ?? 0,
+        frequency: current.frequency,
+        interval_count: current.interval_count ?? 1,
+        start_date: current.start_date,
+        end_date: current.end_date ?? '',
+        ...payload,
+      }
+      const updated = await api.updateRecurring(id, body)
       const idx = this.items.findIndex((r) => r.id === id)
       if (idx > -1) this.items[idx] = updated
       return updated
     },
 
-    toggleActive(id) {
-      const item = this.items.find((r) => r.id === id)
-      if (item) this.update(id, { is_active: !item.is_active })
+    async pause(id) {
+      const updated = await api.pauseRecurring(id)
+      const idx = this.items.findIndex((r) => r.id === id)
+      if (idx > -1) this.items[idx] = updated
+      return updated
+    },
+
+    async resume(id) {
+      const updated = await api.resumeRecurring(id)
+      const idx = this.items.findIndex((r) => r.id === id)
+      if (idx > -1) this.items[idx] = updated
+      return updated
     },
 
     async remove(id) {
@@ -72,26 +89,11 @@ export const useRecurringStore = defineStore('recurring', {
       this.items = this.items.filter((r) => r.id !== id)
     },
 
-    // Posts a real transaction from this recurring template and rolls
-    // next_run forward. In production this is what a backend cron job
-    // would do on schedule — this button lets you trigger it manually,
-    // which is also handy for testing/demoing without waiting for a date.
-    async postNow(id) {
-      const item = this.items.find((r) => r.id === id)
-      if (!item) return
-
-      const transactions = useTransactionsStore()
-      await transactions.create({
-        title: item.title,
-        amount: item.amount,
-        type: item.type,
-        category: item.category,
-        account_id: item.account_id,
-        date: item.next_run,
-        note: 'Posted from recurring',
-      })
-
-      await this.update(id, { next_run: advanceDate(item.next_run, item.frequency) })
+    // Delegates to the backend scheduler. Do NOT post a client-side
+    // transaction here — the backend already creates the transaction when
+    // the rule fires. Calling this just forces a run-now.
+    async runDue() {
+      return api.runRecurring()
     },
   },
 })

@@ -13,22 +13,22 @@ const recurringStore = useRecurringStore()
 </script>
 
 <template>
-  <tr :class="{ inactive: !item.is_active }">
+  <tr :class="{ inactive: !item.active }">
     <td class="txn-title">{{ item.title }}</td>
     <td class="txn-date">{{ item.category }}</td>
     <td class="txn-date">{{ accountName || '—' }}</td>
     <td class="txn-date">{{ frequencyLabel(item.frequency) }}</td>
-    <td class="txn-date" :class="{ overdue: item.is_active && isOverdue(item.next_run) }">
-      {{ item.is_active ? relativeDueLabel(item.next_run) : 'Paused' }}
+    <td class="txn-date" :class="{ overdue: item.active && isOverdue(item.next_run_at) }">
+      {{ item.active ? relativeDueLabel(item.next_run_at) : 'Paused' }}
     </td>
     <td class="txn-amt mono" :class="item.type === 'income' ? 'positive' : 'negative'">
       {{ item.type === 'income' ? '+' : '−' }}{{ formatCurrency(item.amount) }}
     </td>
     <td class="actions">
-      <button class="icon-btn" :title="item.is_active ? 'Pause' : 'Resume'" @click="recurringStore.toggleActive(item.id)">
-        <Icon :name="item.is_active ? 'pause' : 'play'" size="14" />
+      <button class="icon-btn" @click="item.active ? recurringStore.pause(item.id) : recurringStore.resume(item.id)">
+        {{ item.active ? 'Pause' : 'Resume' }}
       </button>
-      <button class="icon-btn" title="Post now" :disabled="!item.is_active" @click="recurringStore.postNow(item.id)">
+      <button class="icon-btn" title="Post now" :disabled="!item.active" @click="recurringStore.postNow(item.id)">
         <Icon name="check" size="14" />
       </button>
       <button class="icon-btn danger" title="Delete" @click="recurringStore.remove(item.id)">
