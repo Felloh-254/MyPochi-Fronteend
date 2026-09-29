@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { api, ApiError } from '../services/api'
+// NOTE: no top-level import of './accounts' here — it's loaded lazily inside
+// _refreshAccounts to avoid a circular dependency between the two stores.
 
 export const useTransactionsStore = defineStore('transactions', {
   state: () => ({
@@ -47,20 +49,19 @@ export const useTransactionsStore = defineStore('transactions', {
             : Array.isArray(payload?.transactions)
               ? payload.transactions
               : []
-        
+
         // Transform each transaction to ensure it has the required fields for UI display
         items = items.map((t) => {
           // If this is a full TransactionDetail response (with entries), enrich with convenience fields
           if (t.entries && Array.isArray(t.entries) && t.entries.length > 0) {
             return {
               ...t,
-              // Add convenience fields for UI compatibility
               account_id: t.entries[0].account_id,
               amount: Math.abs(t.entries[0].amount || 0),
               category: t.categories && t.categories.length > 0 ? t.categories[0].name : '',
             }
           }
-          // If this is a basic transaction (from /api/transactions list), 
+          // If this is a basic transaction (from /api/transactions list),
           // ensure it has the fields the UI expects, using fallback values
           return {
             ...t,
@@ -71,7 +72,7 @@ export const useTransactionsStore = defineStore('transactions', {
             categories: t.categories || [],
           }
         })
-        
+
         this.items = items
       } catch (e) {
         this.items = []
@@ -82,6 +83,19 @@ export const useTransactionsStore = defineStore('transactions', {
         throw e
       } finally {
         this.loading = false
+      }
+    },
+
+    // Call this after any mutation that changes account balances.
+    // Lazy import avoids a top-level circular dependency with accounts.js.
+    async _refreshAccounts() {
+      try {
+        const { useAccountsStore } = await import('./accounts')
+        await useAccountsStore().fetch()
+      } catch (e) {
+        // Don't fail the transaction if the refresh fails — the write
+        // already succeeded. Log it so the UI can retry if needed.
+        console.error('[transactions] account refresh after mutation failed:', e)
       }
     },
 
@@ -112,6 +126,8 @@ export const useTransactionsStore = defineStore('transactions', {
         }
 
         this.items.unshift(enriched)
+
+        await this._refreshAccounts()   // <-- auto-refetch balances
         return enriched
       } catch (e) {
         this.error = e.message
@@ -124,6 +140,7 @@ export const useTransactionsStore = defineStore('transactions', {
     async remove(id) {
       await api.deleteTransaction(id)
       this.items = this.items.filter((t) => t.id !== id)
+      await this._refreshAccounts()   // <-- reversal changes balances
     },
   },
 })

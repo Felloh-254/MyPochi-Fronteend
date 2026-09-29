@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { api, ApiError } from '../services/api'
-import { useTransactionsStore } from './transactions'
 
 export const useAccountsStore = defineStore('accounts', {
   state: () => ({
@@ -10,19 +9,15 @@ export const useAccountsStore = defineStore('accounts', {
   }),
 
   getters: {
-    // Balance = starting balance + everything posted against this account.
-    // Kept derived (not stored) so it's always consistent with the
-    // transaction list, in both live and demo data.
+    // Balance comes straight from the backend.
+    // The backend updates account_balances transactionally (with a version
+    // column), so it is the single source of truth. Do NOT add transaction
+    // netting here — that double-counts every ledger entry.
     balanceFor: (state) => (accountId) => {
       const items = Array.isArray(state.items) ? state.items : []
       const account = items.find((a) => a.id === accountId)
       if (!account) return 0
-      const transactions = useTransactionsStore()
-      const transactionItems = Array.isArray(transactions.items) ? transactions.items : []
-      const net = transactionItems
-        .filter((t) => t.account_id === accountId)
-        .reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0)
-      return (account.balance ?? account.starting_balance ?? 0) + net
+      return account.balance ?? account.starting_balance ?? 0
     },
 
     totalBalance() {
