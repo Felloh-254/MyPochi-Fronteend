@@ -8,7 +8,9 @@ import AppTopbar from './components/AppTopbar.vue'
 import AddTransactionModal from './components/AddTransactionModal.vue'
 import ErrorAlert from './components/ErrorAlert.vue'
 import './styles/animations.css'
+import { watch } from 'vue'
 
+watch(() => route.fullPath, () => { ui.mobileNavOpen = false })
 const auth = useAuthStore()
 const ui = useUiStore()
 const router = useRouter()

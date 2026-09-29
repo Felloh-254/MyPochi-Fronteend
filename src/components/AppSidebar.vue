@@ -22,7 +22,7 @@ const navItems = [
 </script>
 
 <template>
-  <aside class="sidebar" :class="{ collapsed: ui.sidebarCollapsed }">
+  <aside class="sidebar" :class="{ collapsed: ui.sidebarCollapsed, 'nav-open': ui.mobileNavOpen }">
     <div class="brand">
       <img :src="logo" alt="MyPochi logo" class="brand-mark" />
       <button
@@ -52,6 +52,7 @@ const navItems = [
     </nav>
 
   </aside>
+  <div v-if="ui.mobileNavOpen" class="sidebar-backdrop" @click="ui.mobileNavOpen = false"></div>
 </template>
 
 <style scoped>
@@ -167,7 +168,11 @@ const navItems = [
 .sidebar.collapsed .nav-item span {
   display: none;
 }
-
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
 @media (max-width: 760px) {
   .sidebar {
     position: fixed;
@@ -202,7 +207,7 @@ const navItems = [
   .collapse-toggle {
     display: none;
   }
-  :global(.app-shell.nav-open) .sidebar {
+  .sidebar.nav-open {
     transform: translateX(0);
     box-shadow: 0 0 0 100vmax rgba(20, 20, 43, 0.4);
   }
