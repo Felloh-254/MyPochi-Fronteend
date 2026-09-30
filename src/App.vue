@@ -12,7 +12,7 @@ import './styles/animations.css'
 const auth = useAuthStore()
 const ui = useUiStore()
 const router = useRouter()
-const route = useRoute()   // <-- ADD THIS
+const route = useRoute()
 
 
 const handleUnauthorized = (event) => {
