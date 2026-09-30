@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import { useUiStore } from './stores/ui'
 import AppSidebar from './components/AppSidebar.vue'
@@ -8,12 +8,12 @@ import AppTopbar from './components/AppTopbar.vue'
 import AddTransactionModal from './components/AddTransactionModal.vue'
 import ErrorAlert from './components/ErrorAlert.vue'
 import './styles/animations.css'
-import { watch } from 'vue'
 
-watch(() => route.fullPath, () => { ui.mobileNavOpen = false })
 const auth = useAuthStore()
 const ui = useUiStore()
 const router = useRouter()
+const route = useRoute()   // <-- ADD THIS
+
 
 const handleUnauthorized = (event) => {
   const message = event.detail?.message || 'Your session has expired. Please sign in again.'

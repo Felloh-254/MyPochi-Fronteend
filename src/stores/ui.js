@@ -15,6 +15,7 @@ export const useUiStore = defineStore('ui', {
     searchQuery: '',
     routeDataError: null,
   }),
+
   actions: {
     setRouteDataError(error) {
       this.routeDataError = error
@@ -22,6 +23,18 @@ export const useUiStore = defineStore('ui', {
     clearRouteDataError() {
       this.routeDataError = null
     },
+
+    // ---- mobile nav ----
+    openMobileNav() {
+      this.mobileNavOpen = true
+    },
+    closeMobileNav() {
+      this.mobileNavOpen = false
+    },
+    toggleMobileNav() {
+      this.mobileNavOpen = !this.mobileNavOpen
+    },
+
     openTxnModal() {
       this.txnModalOpen = true
     },

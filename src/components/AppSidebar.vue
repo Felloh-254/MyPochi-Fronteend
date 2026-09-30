@@ -25,6 +25,8 @@ const navItems = [
   <aside class="sidebar" :class="{ collapsed: ui.sidebarCollapsed, 'nav-open': ui.mobileNavOpen }">
     <div class="brand">
       <img :src="logo" alt="MyPochi logo" class="brand-mark" />
+
+      <!-- Desktop collapse toggle (unchanged) -->
       <button
         class="collapse-toggle"
         type="button"
@@ -33,6 +35,17 @@ const navItems = [
         @click="ui.sidebarCollapsed = !ui.sidebarCollapsed"
       >
         <Icon :name="ui.sidebarCollapsed ? 'chevronRight' : 'chevronLeft'" size="16" />
+      </button>
+
+      <!-- Mobile close (X) button — only shown on small screens when nav is open -->
+      <button
+        class="close-toggle"
+        type="button"
+        aria-label="Close navigation"
+        title="Close navigation"
+        @click="ui.mobileNavOpen = false"
+      >
+        <Icon name="x" size="18" />
       </button>
     </div>
 
@@ -50,8 +63,8 @@ const navItems = [
         <span>{{ item.label }}</span>
       </router-link>
     </nav>
-
   </aside>
+
   <div v-if="ui.mobileNavOpen" class="sidebar-backdrop" @click="ui.mobileNavOpen = false"></div>
 </template>
 
@@ -112,6 +125,29 @@ const navItems = [
   background: var(--ink-2);
   color: #fff;
 }
+
+/* Close (X) button: hidden by default (desktop), shown on mobile when open */
+.close-toggle {
+  display: none;
+  position: absolute;
+  top: 4px;
+  right: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #45456f;
+  border-radius: 7px;
+  background: transparent;
+  color: #b9b9dc;
+  cursor: pointer;
+}
+.close-toggle:hover {
+  background: var(--ink-2);
+  color: #fff;
+}
+
 .sidebar.collapsed .brand {
   flex-direction: column;
   align-items: center;
@@ -173,6 +209,7 @@ const navItems = [
   inset: 0;
   z-index: -1;
 }
+
 @media (max-width: 760px) {
   .sidebar {
     position: fixed;
@@ -204,9 +241,15 @@ const navItems = [
   .sidebar.collapsed .nav-item span {
     display: block;
   }
+
+  /* On mobile: hide the desktop collapse toggle, show the X when nav is open */
   .collapse-toggle {
     display: none;
   }
+  .sidebar.nav-open .close-toggle {
+    display: inline-flex;
+  }
+
   .sidebar.nav-open {
     transform: translateX(0);
     box-shadow: 0 0 0 100vmax rgba(20, 20, 43, 0.4);
