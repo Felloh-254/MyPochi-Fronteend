@@ -31,7 +31,7 @@ watch(
 function emptyForm() {
   return {
     tab: 'income-expense', // 'income-expense' or 'transfer'
-    type: 'expense',
+    type: '',
     title: '',
     amount: null,
     category: '',
@@ -45,6 +45,9 @@ function emptyForm() {
 
 const form = reactive(emptyForm())
 const error = computed(() => transactionsStore.error)
+const directionError = ref(false)
+const selectedAccount = computed(() => accountsStore.items.find((account) => account.id === (form.tab === 'transfer' ? form.from_account_id : form.account_id)))
+const amountCurrency = computed(() => selectedAccount.value?.currency || 'KES')
 
 // Local, synchronous submission state. We don't rely solely on
 // transactionsStore.loading here: that flag is only as fast as the store's
@@ -65,12 +68,22 @@ const categorySuggestions = computed(() => {
   return [...new Set([...fromBudgets, ...fromTxns])].sort()
 })
 
+function selectDirection(type) {
+  form.type = type
+  directionError.value = false
+}
+
 function close() {
   if (isBusy.value) return
   ui.txnModalOpen = false
 }
 
 async function submit() {
+  if (form.tab === 'income-expense' && !form.type) {
+    directionError.value = true
+    return
+  }
+
   // Guard clause: if a submission is already in flight (or just
   // succeeded), ignore any further clicks/Enter-presses until this one
   // finishes. This check happens synchronously, before any network call,
@@ -118,217 +131,270 @@ async function submit() {
 </script>
 
 <template>
-  <BaseModal title="Add transaction" :prevent-close="isBusy" @close="close">
-    <form @submit.prevent="submit">
+  <BaseModal
+    title="Add transaction"
+    subtitle="Record money coming in, going out, or moving between accounts."
+    :prevent-close="isBusy"
+    @close="close"
+  >
+    <form class="txn-form" @submit.prevent="submit">
       <p class="sr-only" role="status" aria-live="polite">{{ statusMessage }}</p>
       <fieldset class="txn-fieldset" :disabled="isBusy">
-      <div class="tab-toggle">
-        <button 
-          type="button" 
-          class="tab-btn" 
-          :class="{ active: form.tab === 'income-expense' }" 
-          @click="form.tab = 'income-expense'"
-        >
-          Income/Expense
-        </button>
-        <button 
-          type="button" 
-          class="tab-btn" 
-          :class="{ active: form.tab === 'transfer' }" 
-          @click="form.tab = 'transfer'"
-        >
-          Transfer
-        </button>
-      </div>
-
-      <!-- Income/Expense Tab -->
-      <div v-if="form.tab === 'income-expense'">
-        <div class="type-toggle">
-          <button type="button" class="expense" :class="{ active: form.type === 'expense' }" @click="form.type = 'expense'">
-            Expense
+        <div class="form-label">Activity</div>
+        <div class="kind-switch" role="tablist" aria-label="Transaction kind">
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="form.tab === 'income-expense'"
+            :class="{ active: form.tab === 'income-expense' }"
+            @click="form.tab = 'income-expense'"
+          >
+            <Icon name="trending" size="16" />
+            <span>Income or expense</span>
           </button>
-          <button type="button" class="income" :class="{ active: form.type === 'income' }" @click="form.type = 'income'">
-            Income
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="form.tab === 'transfer'"
+            :class="{ active: form.tab === 'transfer' }"
+            @click="form.tab = 'transfer'"
+          >
+            <Icon name="repeat" size="16" />
+            <span>Transfer</span>
           </button>
         </div>
 
-        <div class="field">
-          <label>Title</label>
-          <input v-model="form.title" placeholder="e.g. Whole Foods" required />
-        </div>
+        <div v-if="form.tab === 'income-expense'" class="form-panel">
+          <div class="direction-switch" aria-label="Income or expense">
+            <button
+              type="button"
+              :aria-pressed="form.type === 'expense'"
+              :class="{ active: form.type === 'expense' }"
+              @click="selectDirection('expense')"
+            >
+              <span class="direction-mark expense-mark">−</span>
+              <span>Expense</span>
+            </button>
+            <button
+              type="button"
+              :aria-pressed="form.type === 'income'"
+              :class="{ active: form.type === 'income' }"
+              @click="selectDirection('income')"
+            >
+              <span class="direction-mark income-mark">+</span>
+              <span>Income</span>
+            </button>
+          </div>
+          <p v-if="!form.type || directionError" class="direction-message" :class="{ 'direction-message--error': directionError }" role="status">
+            {{ directionError ? 'Please select income or expense before saving.' : 'Select income or expense to continue.' }}
+          </p>
 
-        <div class="field-row">
           <div class="field">
-            <label>Amount</label>
-            <input v-model.number="form.amount" type="number" min="0.01" step="0.01" placeholder="0.00" required />
+            <label for="transaction-title">Description</label>
+            <input id="transaction-title" v-model="form.title" placeholder="What was this transaction for?" autocomplete="off" required />
           </div>
-          <div class="field">
-            <label>Date</label>
-            <input v-model="form.date" type="date" required />
-          </div>
-        </div>
 
-        <div class="field-row">
-          <div class="field">
-            <label>Category</label>
-            <input v-model="form.category" list="category-options" placeholder="e.g. Groceries" required />
-            <datalist id="category-options">
-              <option v-for="c in categorySuggestions" :key="c" :value="c"></option>
-            </datalist>
+          <div class="field-row">
+            <div class="field amount-field">
+              <label for="transaction-amount">Amount</label>
+              <div class="amount-input-wrap">
+                <span class="currency-prefix">{{ amountCurrency }}</span>
+                <input id="transaction-amount" v-model.number="form.amount" type="number" min="0.01" step="0.01" placeholder="0.00" inputmode="decimal" required />
+              </div>
+            </div>
+            <div class="field">
+              <label for="transaction-date">Date</label>
+              <input id="transaction-date" v-model="form.date" type="date" required />
+            </div>
           </div>
-          <div class="field">
-            <label>Account</label>
-            <select v-model.number="form.account_id" required>
-              <option v-for="a in accountsStore.items" :key="a.id" :value="a.id">{{ a.name }}</option>
-            </select>
-          </div>
-        </div>
 
-        <div class="field">
-          <label>Note (optional)</label>
-          <input v-model="form.note" placeholder="Anything worth remembering" />
-        </div>
-      </div>
-
-      <!-- Transfer Tab -->
-      <div v-if="form.tab === 'transfer'">
-        <div class="field">
-          <label>Title</label>
-          <input v-model="form.title" placeholder="e.g. Transfer to savings" required />
-        </div>
-
-        <div class="field-row">
-          <div class="field">
-            <label>Amount</label>
-            <input v-model.number="form.amount" type="number" min="0.01" step="0.01" placeholder="0.00" required />
-          </div>
-          <div class="field">
-            <label>Date</label>
-            <input v-model="form.date" type="date" required />
-          </div>
-        </div>
-
-        <div class="field-row">
-          <div class="field">
-            <label>From Account</label>
-            <select v-model.number="form.from_account_id" required>
-              <option v-for="a in accountsStore.items" :key="a.id" :value="a.id">{{ a.name }}</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>To Account</label>
-            <select v-model.number="form.to_account_id" required>
-              <option v-for="a in accountsStore.items" :key="a.id" :value="a.id">{{ a.name }}</option>
-            </select>
+          <div class="field-row">
+            <div class="field">
+              <label for="transaction-category">Category</label>
+              <input id="transaction-category" v-model="form.category" list="category-options" placeholder="Choose or enter a category" required />
+              <datalist id="category-options">
+                <option v-for="category in categorySuggestions" :key="category" :value="category"></option>
+              </datalist>
+            </div>
+            <div class="field">
+              <label for="transaction-account">Account</label>
+              <select id="transaction-account" v-model.number="form.account_id" required>
+                <option v-for="account in accountsStore.items" :key="account.id" :value="account.id">{{ account.name }}</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <div class="field">
-          <label>Note (optional)</label>
-          <input v-model="form.note" placeholder="Anything worth remembering" />
+        <div v-else class="form-panel">
+          <div class="field">
+            <label for="transfer-title">Description</label>
+            <input id="transfer-title" v-model="form.title" placeholder="e.g. Move money to savings" autocomplete="off" required />
+          </div>
+
+          <div class="field-row">
+            <div class="field amount-field">
+              <label for="transfer-amount">Amount</label>
+              <div class="amount-input-wrap">
+                <span class="currency-prefix">{{ amountCurrency }}</span>
+                <input id="transfer-amount" v-model.number="form.amount" type="number" min="0.01" step="0.01" placeholder="0.00" inputmode="decimal" required />
+              </div>
+            </div>
+            <div class="field">
+              <label for="transfer-date">Date</label>
+              <input id="transfer-date" v-model="form.date" type="date" required />
+            </div>
+          </div>
+
+          <div class="field-row account-transfer-row">
+            <div class="field">
+              <label for="transfer-from">From account</label>
+              <select id="transfer-from" v-model.number="form.from_account_id" required>
+                <option v-for="account in accountsStore.items" :key="account.id" :value="account.id">{{ account.name }}</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="transfer-to">To account</label>
+              <select id="transfer-to" v-model.number="form.to_account_id" required>
+                <option v-for="account in accountsStore.items" :key="account.id" :value="account.id">{{ account.name }}</option>
+              </select>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <p v-if="error" class="field-error">{{ error }}</p>
+        <div class="field note-field">
+          <label for="transaction-note">Note <span>Optional</span></label>
+          <input id="transaction-note" v-model="form.note" placeholder="Add a detail you may want later" />
+        </div>
 
-      <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" @click="close">Cancel</button>
-        <button type="submit" class="btn btn-primary btn-submit" :disabled="isBusy" :aria-busy="status === 'submitting'">
-          <span v-if="status === 'submitting'" class="btn-spinner" aria-hidden="true"></span>
-          <Icon v-else-if="status === 'success'" name="check" size="15" />
-          <span>{{ status === 'submitting' ? 'Saving…' : status === 'success' ? 'Saved' : 'Save transaction' }}</span>
-        </button>
-      </div>
+        <p v-if="error" class="field-error" role="alert">{{ error }}</p>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" @click="close">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-submit" :disabled="isBusy" :aria-busy="status === 'submitting'">
+            <span v-if="status === 'submitting'" class="btn-spinner" aria-hidden="true"></span>
+            <Icon v-else-if="status === 'success'" name="check" size="15" />
+            <span>{{ status === 'submitting' ? 'Saving…' : status === 'success' ? 'Saved' : 'Save transaction' }}</span>
+          </button>
+        </div>
       </fieldset>
     </form>
   </BaseModal>
 </template>
 
 <style scoped>
-.tab-toggle {
-  display: flex;
+.txn-form { padding-top: 2px; }
+.txn-fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.form-label, .field label {
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+.kind-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 8px 0 20px;
+  padding: 5px;
   border: 1px solid var(--line);
-  border-radius: 9px;
-  overflow: hidden;
-  margin-bottom: 16px;
+  border-radius: 13px;
+  background: #f7f7fb;
 }
-.tab-btn {
-  flex: 1;
-  background: #fff;
-  border: none;
-  padding: 9px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-soft);
-  cursor: pointer;
-}
-.tab-btn.active {
-  background: var(--bg-soft);
-  color: var(--text);
-}
-
-.type-toggle {
+.kind-switch button {
   display: flex;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  overflow: hidden;
-  margin-bottom: 16px;
-}
-.type-toggle button {
-  flex: 1;
-  background: #fff;
-  border: none;
-  padding: 9px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-soft);
-}
-.type-toggle button.active.expense {
-  background: var(--rose-soft);
-  color: var(--rose);
-}
-.type-toggle button.active.income {
-  background: var(--mint-soft);
-  color: var(--mint);
-}
-
-/* Reset native fieldset chrome so disabling the form during submit
-   doesn't change its look, only its interactivity. */
-.txn-fieldset {
-  border: none;
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-}
-.txn-fieldset:disabled .field input,
-.txn-fieldset:disabled .field select,
-.txn-fieldset:disabled .tab-btn,
-.txn-fieldset:disabled .type-toggle button {
-  cursor: not-allowed;
-  opacity: 0.65;
-}
-
-.btn-submit {
-  display: inline-flex;
+  min-height: 42px;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  min-width: 148px;
+  gap: 9px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 600;
+  transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
-.btn-submit:disabled {
-  cursor: not-allowed;
-  opacity: 0.85;
+.kind-switch button.active {
+  border-color: #e9e8f5;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 2px 5px rgba(20, 20, 43, 0.06);
 }
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.kind-switch button.active :deep(svg) { color: var(--violet); }
+.form-panel { animation: panel-in 0.16s ease-out; }
+.direction-switch {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
 }
+.direction-switch button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.direction-mark {
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 17px;
+  line-height: 1;
+}
+.expense-mark { background: var(--rose-soft); color: var(--rose); }
+.income-mark { background: var(--mint-soft); color: #168b49; }
+.direction-switch button.active:first-child { border-color: #df6677; background: #fde8eb; color: #a92f43; box-shadow: 0 0 0 2px rgba(240, 87, 107, 0.12); }
+.direction-switch button.active:last-child { border-color: #37a967; background: #e4f9ec; color: #176b3c; box-shadow: 0 0 0 2px rgba(55, 200, 113, 0.14); }
+.direction-switch button.active .direction-mark { transform: scale(1.08); }
+.direction-message { margin: -10px 0 15px; color: var(--text-soft); font-size: 12px; line-height: 1.4; }
+.direction-message--error { color: #b92e43; font-weight: 650; }
+.form-panel .field { margin-bottom: 15px; }
+.field label { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.field label span { color: var(--text-faint); font-size: 11px; font-weight: 500; }
+.field input, .field select {
+  min-height: 44px;
+  border-color: #dedeea;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 13px;
+}
+.field input::placeholder { color: #a3a3b6; }
+.field input:focus, .field select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 111, 238, 0.11); }
+.amount-input-wrap {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  border: 1px solid #d8d6ef;
+  border-radius: 10px;
+  background: #fbfaff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.amount-input-wrap:focus-within { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 111, 238, 0.11); background: #fff; }
+.currency-prefix { padding-left: 13px; color: var(--text-soft); font-size: 12px; font-weight: 700; }
+.amount-input-wrap input { width: 100%; min-width: 0; border: 0; background: transparent; box-shadow: none !important; font-size: 17px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.amount-input-wrap input:focus { outline: none; }
+.note-field { margin-top: 2px; margin-bottom: 0; }
+.field-error { margin-top: 12px; padding: 10px 12px; border: 1px solid #f7d1d7; border-radius: 9px; background: #fff7f8; color: #bf344a; font-size: 12px; }
+.modal-actions { margin-top: 21px; padding-top: 18px; }
+.btn-submit { min-width: 158px; min-height: 42px; justify-content: center; gap: 8px; border-radius: 10px; }
+.btn-submit:disabled { cursor: not-allowed; opacity: 0.8; }
+.txn-fieldset:disabled .field input, .txn-fieldset:disabled .field select, .txn-fieldset:disabled button { cursor: not-allowed; opacity: 0.65; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+@keyframes panel-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 560px) {
+  .kind-switch button { gap: 6px; font-size: 12px; }
+  .field-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .modal-actions { gap: 8px; }
+  .modal-actions .btn { flex: 1; justify-content: center; }
+  .btn-submit { min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .form-panel { animation: none; } }
 </style>
