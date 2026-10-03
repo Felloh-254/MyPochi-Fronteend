@@ -14,9 +14,15 @@ export const useUiStore = defineStore('ui', {
     notificationsPanelOpen: false,
     searchQuery: '',
     routeDataError: null,
+    toastMessage: "",
   }),
 
   actions: {
+    showToast(message) {
+      this.toastMessage = message
+      clearTimeout(this._toastTimeout)
+      this._toastTimeout = setTimeout(() => { this.toastMessage = ""; this._toastTimeout = null }, 3200)
+    },
     setRouteDataError(error) {
       this.routeDataError = error
     },

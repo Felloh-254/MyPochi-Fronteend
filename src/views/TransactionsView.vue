@@ -66,30 +66,32 @@ function accountName(accountId) {
 
     <LoadingSpinner v-if="transactionsStore.loading" size="small" label="Loading transactions…" />
 
-    <div v-else class="card content-enter content-enter--delay-1" style="padding: 8px 22px 22px">
-      <table class="txn-table" v-if="filtered.length">
-        <thead>
-          <tr>
-            <th>Transaction</th>
-            <th>Category</th>
-            <th>Account</th>
-            <th>Date</th>
-            <th>Note</th>
-            <th style="text-align: right">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <TransactionRow
-            v-for="t in filtered"
-            :key="t.id"
-            :transaction="t"
-            :category-color="categoryColor(t.category)"
-            :account-name="accountName(t.account_id)"
-            show-note
-            class="table-row-enter-active"
-          />
-        </tbody>
-      </table>
+    <div v-else class="card content-enter content-enter--delay-1 transaction-card">
+      <div v-if="filtered.length" class="transaction-table-scroll" role="region" aria-label="Transactions table" tabindex="0">
+        <table class="txn-table">
+          <thead>
+            <tr>
+              <th>Transaction</th>
+              <th>Category</th>
+              <th>Account</th>
+              <th>Date</th>
+              <th>Note</th>
+              <th style="text-align: right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <TransactionRow
+              v-for="t in filtered"
+              :key="t.id"
+              :transaction="t"
+              :category-color="categoryColor(t.category)"
+              :account-name="accountName(t.account_id)"
+              show-note
+              class="table-row-enter-active"
+            />
+          </tbody>
+        </table>
+      </div>
       <p class="empty" v-else>No transactions match yet. Add one to get started.</p>
     </div>
   </div>
@@ -100,6 +102,35 @@ function accountName(accountId) {
   display: flex;
   flex-direction: column;
   gap: 22px;
+  width: 100%;
+  min-width: 0;
   max-width: 1180px;
+}
+
+.transaction-card {
+  min-width: 0;
+  padding: 8px 22px 22px;
+}
+
+.transaction-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.transaction-table-scroll:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+.transaction-table-scroll .txn-table {
+  min-width: 760px;
+}
+
+@media (max-width: 640px) {
+  .transaction-card {
+    padding: 8px 12px 16px;
+  }
 }
 </style>

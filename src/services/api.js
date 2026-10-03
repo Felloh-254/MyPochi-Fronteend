@@ -46,6 +46,16 @@ async function request(path, { method = 'GET', body, auth = true, idempotencyKey
 
     throw new ApiError(data.error || `Request failed (${res.status})`, res.status)
   }
+  if (method !== "GET" && !path.startsWith("/api/auth/")) {
+    const segment = path.split("?")[0].split("/").filter(Boolean).at(1)
+    const labels = { transactions: "Transaction", accounts: "Account", budgets: "Budget", goals: "Goal", recurring: "Recurring transaction" }
+    const label = labels[segment] || "Activity"
+    let message = `${label} saved successfully`
+    if (method === "POST" && segment === "goals" && path.includes("/contribute")) message = "Goal contribution added"
+    else if (method === "POST") message = `${label} created successfully`
+    else if (method === "DELETE") message = `${label} deleted successfully`
+    window.dispatchEvent(new CustomEvent("app:success", { detail: { message } }))
+  }
   return data
 }
 

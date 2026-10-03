@@ -24,16 +24,22 @@ const handleUnauthorized = (event) => {
   }
 }
 
+function handleSuccess(event) {
+  ui.showToast(event.detail?.message || "Activity completed successfully")
+}
+
 function retryRouteData() {
   window.location.reload()
 }
 
 onMounted(() => {
   window.addEventListener('auth:unauthorized', handleUnauthorized)
+  window.addEventListener("app:success", handleSuccess)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('auth:unauthorized', handleUnauthorized)
+  window.removeEventListener("app:success", handleSuccess)
 })
 </script>
 
@@ -62,6 +68,12 @@ onBeforeUnmount(() => {
   </router-view>
 
   <AddTransactionModal v-if="auth.isAuthenticated && ui.txnModalOpen" />
+  <Transition name="app-toast">
+    <div v-if="auth.isAuthenticated && ui.toastMessage" class="app-toast" role="status" aria-live="polite">
+      <span class="toast-check" aria-hidden="true">✓</span>
+      {{ ui.toastMessage }}
+    </div>
+  </Transition>
 </template>
 
 <style scoped>
@@ -86,4 +98,26 @@ onBeforeUnmount(() => {
     padding: 4px 18px 40px;
   }
 }
+.app-toast {
+  position: fixed;
+  z-index: 2000;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+  padding: 12px 16px;
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  border-radius: 12px;
+  background: #102b2a;
+  color: #f0fdfa;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.2);
+  font-size: 13px;
+  font-weight: 600;
+}
+.toast-check { color: #5eead4; font-size: 16px; }
+.app-toast-enter-active, .app-toast-leave-active { transition: opacity 220ms ease, transform 220ms ease; }
+.app-toast-enter-from, .app-toast-leave-to { opacity: 0; transform: translateY(10px); }
+@media (max-width: 640px) {.app-toast { right: 16px; bottom: 16px; left: 16px; max-width: none; } }
 </style>
