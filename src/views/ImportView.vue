@@ -42,12 +42,19 @@ async function runImport() {
   // Real bulk-import would ideally hit one backend endpoint; looping
   // client-side keeps this working today against the same per-transaction
   // POST /api/transactions route everything else already uses.
-  for (const row of includedRows.value) {
-    await transactionsStore.create({ ...row, account_id: targetAccountId.value })
+  const toImport = [...includedRows.value]
+  try {
+    for (const row of toImport) {
+      await transactionsStore.create({ ...row, account_id: targetAccountId.value })
+      row.include = false
+      importedCount.value += 1
+    }
+    rows.value = []
+  } catch (e) {
+    addError(`Import stopped after ${importedCount.value} transactions: ${e.message || 'Request failed.'}`)
+  } finally {
+    importing.value = false
   }
-  importedCount.value = includedRows.value.length
-  rows.value = []
-  importing.value = false
 }
 </script>
 
@@ -93,7 +100,8 @@ async function runImport() {
             <option :value="null" disabled>Import into account…</option>
             <option v-for="a in accountsStore.items" :key="a.id" :value="a.id">{{ a.name }}</option>
           </select>
-          <button class="btn btn-primary" :disabled="!targetAccountId || importing" @click="runImport">
+          <button class="btn btn-primary submit-button" :disabled="!targetAccountId || importing" :aria-busy="importing" @click="runImport">
+            <span v-if="importing" class="btn-spinner" aria-hidden="true"></span>
             {{ importing ? 'Importing…' : `Import ${includedRows.length} transactions` }}
           </button>
         </div>

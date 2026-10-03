@@ -39,9 +39,18 @@ export const useRecurringStore = defineStore('recurring', {
     },
 
     async create(payload) {
-      const created = await api.createRecurring(payload)
-      this.items.push(created)
-      return created
+      this.loading = true
+      this.error = null
+      try {
+        const created = await api.createRecurring(payload)
+        this.items.push(created)
+        return created
+      } catch (e) {
+        this.error = e.message || 'Could not create recurring transaction.'
+        throw e
+      } finally {
+        this.loading = false
+      }
     },
 
     // Backend PUT expects the full rule body. Merge with the current item
@@ -64,10 +73,19 @@ export const useRecurringStore = defineStore('recurring', {
         end_date: current.end_date ?? '',
         ...payload,
       }
-      const updated = await api.updateRecurring(id, body)
-      const idx = this.items.findIndex((r) => r.id === id)
-      if (idx > -1) this.items[idx] = updated
-      return updated
+      this.loading = true
+      this.error = null
+      try {
+        const updated = await api.updateRecurring(id, body)
+        const idx = this.items.findIndex((r) => r.id === id)
+        if (idx > -1) this.items[idx] = updated
+        return updated
+      } catch (e) {
+        this.error = e.message || 'Could not update recurring transaction.'
+        throw e
+      } finally {
+        this.loading = false
+      }
     },
 
     async pause(id) {

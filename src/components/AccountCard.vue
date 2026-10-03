@@ -14,7 +14,7 @@ const emit = defineEmits(['delete', 'edit'])
 const accountsStore = useAccountsStore()
 const showBalance = ref(true)
 const balance = computed(() => accountsStore.balanceFor(props.account.id))
-const meta = computed(() => accountTypeMeta(props.account.type))
+const meta = computed(() => accountTypeMeta(props.account.type, props.account.provider))
 const theme = computed(() => accountTheme(props.account))
 const balanceSize = computed(() => {
   const absoluteBalance = Math.abs(balance.value)

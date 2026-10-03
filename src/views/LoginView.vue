@@ -112,17 +112,19 @@ function toggleMode() {
 
           <p v-if="auth.error" class="field-error" aria-live="polite">{{ auth.error }}</p>
 
-          <button type="submit" class="btn btn-primary auth-submit" :disabled="auth.loading">
+          <button type="submit" class="btn btn-primary auth-submit submit-button" :disabled="auth.loading" :aria-busy="auth.loading">
+            <span v-if="auth.loading" class="btn-spinner" aria-hidden="true"></span>
             {{ auth.loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account' }}
-            <span aria-hidden="true">→</span>
+            <span v-if="!auth.loading" class="auth-arrow" aria-hidden="true">→</span>
           </button>
         </form>
 
         <div class="auth-divider"><span>or</span></div>
 
-        <button type="button" class="google-btn" :disabled="auth.loading || (!!googleClientId && !googleReady)" @click="signInWithGoogle">
+        <button type="button" class="google-btn submit-button" :disabled="auth.loading || (!!googleClientId && !googleReady)" :aria-busy="auth.loading" @click="signInWithGoogle">
+          <span v-if="auth.loading" class="btn-spinner" aria-hidden="true"></span>
           <span class="google-mark" aria-hidden="true">G</span>
-          {{ googleReady ? 'Continue with Google' : 'Google sign-in unavailable' }}
+          {{ auth.loading ? 'Signing in…' : googleReady ? 'Continue with Google' : 'Google sign-in unavailable' }}
         </button>
 
         <p class="switch">
@@ -177,8 +179,8 @@ function toggleMode() {
 .field input:focus { outline: none; border-color: rgba(124, 111, 238, 0.8); box-shadow: 0 0 0 3px rgba(124, 111, 238, 0.13); }
 .field-error { margin: -3px 0 0; color: #ce3e50; font-size: 11px; font-weight: 600; }
 .auth-submit { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 46px; margin-top: 4px; border-radius: 10px; box-shadow: 0 8px 18px rgba(91, 79, 209, 0.2); }
-.auth-submit span { font-size: 17px; line-height: 0; transition: transform 0.18s ease; }
-.auth-submit:not(:disabled):hover span { transform: translateX(3px); }
+.auth-arrow { font-size: 17px; line-height: 0; transition: transform 0.18s ease; }
+.auth-submit:not(:disabled):hover .auth-arrow { transform: translateX(3px); }
 .auth-divider { display: flex; align-items: center; gap: 12px; margin: 21px 0 15px; color: var(--text-faint); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
 .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 .google-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 45px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--text); font-size: 13px; font-weight: 700; transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease; }

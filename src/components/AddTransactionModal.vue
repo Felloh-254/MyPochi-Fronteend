@@ -233,7 +233,7 @@ async function submit() {
 
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" @click="close">Cancel</button>
-        <button type="submit" class="btn btn-primary btn-submit" :aria-busy="status === 'submitting'">
+        <button type="submit" class="btn btn-primary btn-submit" :disabled="isBusy" :aria-busy="status === 'submitting'">
           <span v-if="status === 'submitting'" class="btn-spinner" aria-hidden="true"></span>
           <Icon v-else-if="status === 'success'" name="check" size="15" />
           <span>{{ status === 'submitting' ? 'Saving…' : status === 'success' ? 'Saved' : 'Save transaction' }}</span>
@@ -318,22 +318,6 @@ async function submit() {
 .btn-submit:disabled {
   cursor: not-allowed;
   opacity: 0.85;
-}
-
-.btn-spinner {
-  width: 13px;
-  height: 13px;
-  border: 2px solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  display: inline-block;
-  animation: btn-spin 0.6s linear infinite;
-  opacity: 0.85;
-}
-@keyframes btn-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .sr-only {

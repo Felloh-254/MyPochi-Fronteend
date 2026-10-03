@@ -28,16 +28,34 @@ export const useGoalsStore = defineStore('goals', {
     },
 
     async create(payload) {
-      const created = await api.createGoal(payload)
-      this.items.push(created)
-      return created
+      this.loading = true
+      this.error = null
+      try {
+        const created = await api.createGoal(payload)
+        this.items.push(created)
+        return created
+      } catch (e) {
+        this.error = e.message || 'Could not create goal.'
+        throw e
+      } finally {
+        this.loading = false
+      }
     },
 
     async update(id, payload) {
-      const updated = await api.updateGoal(id, payload)
-      const idx = this.items.findIndex((g) => g.id === id)
-      if (idx > -1) this.items[idx] = updated
-      return updated
+      this.loading = true
+      this.error = null
+      try {
+        const updated = await api.updateGoal(id, payload)
+        const idx = this.items.findIndex((g) => g.id === id)
+        if (idx > -1) this.items[idx] = updated
+        return updated
+      } catch (e) {
+        this.error = e.message || 'Could not update goal.'
+        throw e
+      } finally {
+        this.loading = false
+      }
     },
 
     async remove(id) {
@@ -50,10 +68,19 @@ export const useGoalsStore = defineStore('goals', {
     // goal row has no ledger link, so silently creating one here would
     // double-count the money.
     async contribute(id, amount) {
-      const updated = await api.contributeToGoal(id, { amount })
-      const idx = this.items.findIndex((g) => g.id === id)
-      if (idx > -1) this.items[idx] = updated
-      return updated
+      this.loading = true
+      this.error = null
+      try {
+        const updated = await api.contributeToGoal(id, { amount })
+        const idx = this.items.findIndex((g) => g.id === id)
+        if (idx > -1) this.items[idx] = updated
+        return updated
+      } catch (e) {
+        this.error = e.message || 'Could not add contribution.'
+        throw e
+      } finally {
+        this.loading = false
+      }
     },
   },
 })

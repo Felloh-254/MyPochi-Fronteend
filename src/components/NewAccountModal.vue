@@ -2,7 +2,7 @@
 import { reactive, computed, ref, watch } from 'vue'
 import { useAccountsStore } from '../stores/accounts'
 import { useUiStore } from '../stores/ui'
-import { ACCOUNT_TYPES } from '../utils/accountTypes'
+import { ACCOUNT_TYPES, MOBILE_MONEY_PROVIDERS } from '../utils/accountTypes'
 import { CURRENCIES } from '../utils/currencies'
 import { BANKS } from '../utils/accountThemes'
 import BaseModal from './BaseModal.vue'
@@ -15,9 +15,12 @@ const accountsStore = useAccountsStore()
 const ui = useUiStore()
 
 function emptyForm(account = null) {
+  const originalType = account?.type || 'bank'
+  const type = originalType === 'mpesa' ? 'mobile_money' : originalType === 'savings' ? 'investment' : originalType
   return {
     name: account?.name || '',
-    type: account?.type || 'bank',
+    type,
+    provider: account?.provider || (originalType === 'mpesa' ? 'mpesa' : ''),
     bank: bankValue(account),
     account_number: account?.account_number || '',
     balance: account?.balance ?? account?.starting_balance ?? null,
@@ -64,6 +67,10 @@ watch(
   },
 )
 
+watch(() => form.type, (type) => {
+  if (type !== 'mobile_money') form.provider = ''
+})
+
 function selectedCurrency() {
   return CURRENCIES.find((currency) => currency.code === form.currency)
 }
@@ -89,6 +96,7 @@ async function submit() {
     const payload = {
       name: form.name.trim(),
       type: form.type,
+      provider: form.type === 'mobile_money' ? form.provider : '',
       account_number: form.account_number.trim() || null,
       balance: Number(form.balance) || 0,
       currency: form.currency,
@@ -136,6 +144,16 @@ async function submit() {
           <option value="" disabled>Select your bank</option>
           <option v-for="bank in BANKS.filter((item) => item.value !== 'mpesa')" :key="bank.value" :value="bank.value">
             {{ bank.label }}
+          </option>
+        </select>
+      </div>
+
+      <div v-if="form.type === 'mobile_money'" class="field">
+        <label for="account-provider">Mobile money provider</label>
+        <select id="account-provider" v-model="form.provider" required>
+          <option value="" disabled>Select a provider</option>
+          <option v-for="provider in MOBILE_MONEY_PROVIDERS" :key="provider.value" :value="provider.value">
+            {{ provider.label }}
           </option>
         </select>
       </div>
@@ -191,7 +209,8 @@ async function submit() {
 
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" @click="close">Cancel</button>
-        <button type="submit" class="btn btn-primary" :disabled="submitting">
+        <button type="submit" class="btn btn-primary submit-button" :disabled="submitting" :aria-busy="submitting">
+          <span v-if="submitting" class="btn-spinner" aria-hidden="true"></span>
           {{ submitting ? 'Saving…' : editing ? 'Save changes' : 'Create account' }}
         </button>
       </div>

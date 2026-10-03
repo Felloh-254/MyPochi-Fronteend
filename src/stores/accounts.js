@@ -53,16 +53,34 @@ export const useAccountsStore = defineStore('accounts', {
     },
 
     async create(payload) {
-      const created = await api.createAccount(payload)
-      this.items.push(created)
-      return created
+      this.loading = true
+      this.error = null
+      try {
+        const created = await api.createAccount(payload)
+        this.items.push(created)
+        return created
+      } catch (e) {
+        this.error = e.message || 'Could not create account.'
+        throw e
+      } finally {
+        this.loading = false
+      }
     },
 
     async update(id, payload) {
-      const updated = await api.updateAccount(id, payload)
-      const idx = this.items.findIndex((a) => a.id === id)
-      if (idx > -1) this.items[idx] = updated
-      return updated
+      this.loading = true
+      this.error = null
+      try {
+        const updated = await api.updateAccount(id, payload)
+        const idx = this.items.findIndex((a) => a.id === id)
+        if (idx > -1) this.items[idx] = updated
+        return updated
+      } catch (e) {
+        this.error = e.message || 'Could not update account.'
+        throw e
+      } finally {
+        this.loading = false
+      }
     },
 
     async remove(id) {

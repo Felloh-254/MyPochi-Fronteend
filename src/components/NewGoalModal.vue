@@ -76,7 +76,8 @@ async function submit() {
 
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" @click="close">Cancel</button>
-        <button type="submit" class="btn btn-primary" :disabled="submitting">
+        <button type="submit" class="btn btn-primary submit-button" :disabled="submitting" :aria-busy="submitting">
+          <span v-if="submitting" class="btn-spinner" aria-hidden="true"></span>
           {{ submitting ? 'Saving…' : 'Create goal' }}
         </button>
       </div>

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted } from 'vue'
+import { reactive, computed, onMounted, ref } from 'vue'
 import { useGoalsStore } from '../stores/goals'
 import { useAccountsStore } from '../stores/accounts'
 import { useUiStore } from '../stores/ui'
@@ -15,6 +15,8 @@ onMounted(() => {
 })
 
 const goal = computed(() => goalsStore.items.find((g) => g.id === ui.contributeGoalId))
+const submitting = ref(false)
+const error = computed(() => goalsStore.error)
 
 const form = reactive({
   amount: null,
@@ -28,13 +30,21 @@ function close() {
 }
 
 async function submit() {
+  if (submitting.value) return
   if (!goal.value) return close()
-  await goalsStore.contribute(goal.value.id, Number(form.amount), {
-    accountId: form.logTransaction ? form.account_id : null,
-    createTransaction: form.logTransaction,
-  })
-  form.amount = null
-  close()
+  submitting.value = true
+  try {
+    await goalsStore.contribute(goal.value.id, Number(form.amount), {
+      accountId: form.logTransaction ? form.account_id : null,
+      createTransaction: form.logTransaction,
+    })
+    form.amount = null
+    close()
+  } catch {
+    // The store exposes the API error; keep the form open for correction.
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 
@@ -63,9 +73,14 @@ async function submit() {
         </select>
       </div>
 
+      <p v-if="error" class="field-error" role="alert">{{ error }}</p>
+
       <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" @click="close">Cancel</button>
-        <button type="submit" class="btn btn-primary">Add contribution</button>
+        <button type="button" class="btn btn-ghost" :disabled="submitting" @click="close">Cancel</button>
+        <button type="submit" class="btn btn-primary submit-button" :disabled="submitting" :aria-busy="submitting">
+          <span v-if="submitting" class="btn-spinner" aria-hidden="true"></span>
+          {{ submitting ? 'Saving…' : 'Add contribution' }}
+        </button>
       </div>
     </form>
   </BaseModal>

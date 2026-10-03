@@ -39,7 +39,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div v-if="auth.isAuthenticated" class="app-shell" :class="{ 'nav-open': ui.mobileNavOpen }">
-    <AppSidebar class="no-print" />
+    <AppSidebar />
     <div class="main">
       <AppTopbar class="no-print" />
       <ErrorAlert

@@ -22,7 +22,7 @@ const navItems = [
 </script>
 
 <template>
-  <aside class="sidebar" :class="{ collapsed: ui.sidebarCollapsed, 'nav-open': ui.mobileNavOpen }">
+  <aside class="sidebar no-print" :class="{ collapsed: ui.sidebarCollapsed, 'nav-open': ui.mobileNavOpen }">
     <div class="brand">
       <img :src="logo" alt="MyPochi logo" class="brand-mark" />
 

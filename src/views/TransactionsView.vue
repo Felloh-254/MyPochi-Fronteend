@@ -5,6 +5,7 @@ import { useBudgetsStore } from '../stores/budgets'
 import { useAccountsStore } from '../stores/accounts'
 import { useUiStore } from '../stores/ui'
 import ErrorAlert from '../components/ErrorAlert.vue'
+import LoadingSpinner from '../components/LoadingSpinner.vue'
 import { useErrorHandler } from '../utils/useErrorHandler'
 import TransactionRow from '../components/TransactionRow.vue'
 
@@ -43,6 +44,11 @@ function accountName(accountId) {
       :type="error.type"
       @dismiss="dismissError(error.id)"
     />
+    <ErrorAlert
+      v-if="transactionsStore.error"
+      :message="transactionsStore.error"
+      type="error"
+    />
 
     <div class="section-head">
       <div>
@@ -58,7 +64,9 @@ function accountName(accountId) {
       </button>
     </div>
 
-    <div class="card content-enter content-enter--delay-1" style="padding: 8px 22px 22px">
+    <LoadingSpinner v-if="transactionsStore.loading" size="small" label="Loading transactions…" />
+
+    <div v-else class="card content-enter content-enter--delay-1" style="padding: 8px 22px 22px">
       <table class="txn-table" v-if="filtered.length">
         <thead>
           <tr>

@@ -36,17 +36,35 @@ export const useBudgetsStore = defineStore('budgets', {
     },
 
     async create(payload) {
-      const body = { ...payload, month: this.month }
-      const created = await api.createBudget(body)
-      this.items.push(created)
-      return created
+      this.loading = true
+      this.error = null
+      try {
+        const body = { ...payload, month: this.month }
+        const created = await api.createBudget(body)
+        this.items.push(created)
+        return created
+      } catch (e) {
+        this.error = e.message || 'Could not create budget.'
+        throw e
+      } finally {
+        this.loading = false
+      }
     },
 
     async update(id, payload) {
-      const updated = await api.updateBudget(id, { ...payload, month: this.month })
-      const idx = this.items.findIndex((b) => b.id === id)
-      if (idx > -1) this.items[idx] = updated
-      return updated
+      this.loading = true
+      this.error = null
+      try {
+        const updated = await api.updateBudget(id, { ...payload, month: this.month })
+        const idx = this.items.findIndex((b) => b.id === id)
+        if (idx > -1) this.items[idx] = updated
+        return updated
+      } catch (e) {
+        this.error = e.message || 'Could not update budget.'
+        throw e
+      } finally {
+        this.loading = false
+      }
     },
 
     async remove(id) {

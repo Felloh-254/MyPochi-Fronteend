@@ -14,12 +14,17 @@ export const BANKS = [
 const FALLBACK_THEMES = {
   bank: { label: 'Bank', colors: ['#243b72', '#5869b8'], ink: '#fff' },
   savings: { label: 'Savings', colors: ['#5b4fd1', '#8d82f5'], ink: '#fff' },
+  investment: { label: 'Investment', colors: ['#5b4fd1', '#8d82f5'], ink: '#fff' },
   mpesa: { label: 'M-Pesa', colors: ['#00a651', '#008c95'], ink: '#fff' },
+  mobile_money: { label: 'Mobile money', colors: ['#00a651', '#008c95'], ink: '#fff' },
+  airtel_money: { label: 'Airtel Money', colors: ['#d9232e', '#ed6a70'], ink: '#fff' },
   cash: { label: 'Cash', colors: ['#d98324', '#f5b544'], ink: '#fff' },
   other: { label: 'Account', colors: ['#4c5475', '#8189a7'], ink: '#fff' },
 }
 
 export function accountTheme(account) {
+  if (account.provider === 'mpesa') return FALLBACK_THEMES.mpesa
+  if (account.provider === 'airtel_money') return FALLBACK_THEMES.airtel_money
   const selectedBank = BANKS.find((bank) => bank.value === account.bank)
   if (selectedBank) return selectedBank
   const searchText = `${account.name || ''} ${account.account_number || ''}`.toLowerCase()
