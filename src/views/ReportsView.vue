@@ -25,7 +25,14 @@ const inRange = computed(() =>
 )
 
 const income = computed(() => inRange.value.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0))
-const expenses = computed(() => inRange.value.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0))
+const expenses = computed(() =>
+  inRange.value.reduce((total, t) => {
+    const transactionCost = Number(t.transaction_cost) || 0
+    if (t.type === 'expense') return total + t.amount + transactionCost
+    if (t.type === 'transfer') return total + transactionCost
+    return total
+  }, 0),
+)
 
 function accountName(accountId) {
   return accountsStore.items.find((a) => a.id === accountId)?.name ?? ''
@@ -110,6 +117,9 @@ function printReport() {
             <td class="txn-date">{{ accountName(t.account_id) }}</td>
             <td class="txn-amt mono" :class="t.type === 'income' ? 'positive' : 'negative'">
               {{ t.type === 'income' ? '+' : '−' }}{{ formatCurrency(t.amount) }}
+              <span v-if="Number(t.transaction_cost) > 0" class="txn-cost">
+                +{{ formatCurrency(t.transaction_cost) }} fee
+              </span>
             </td>
           </tr>
         </tbody>
@@ -169,5 +179,14 @@ function printReport() {
 }
 .report-summary .negative {
   color: var(--rose);
+}
+.txn-cost {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-faint);
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  text-align: right;
 }
 </style>

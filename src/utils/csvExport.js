@@ -5,7 +5,7 @@ function csvEscape(value) {
 }
 
 export function transactionsToCsv(transactions, accountNameFor) {
-  const header = ['Date', 'Title', 'Category', 'Account', 'Type', 'Amount', 'Note']
+  const header = ['Date', 'Title', 'Category', 'Account', 'Type', 'Amount', 'Transaction cost', 'Note']
   const rows = transactions.map((t) => [
     t.date,
     t.title,
@@ -13,6 +13,7 @@ export function transactionsToCsv(transactions, accountNameFor) {
     accountNameFor ? accountNameFor(t.account_id) : '',
     t.type,
     t.amount,
+    t.transaction_cost || 0,
     t.note || '',
   ])
   return [header, ...rows].map((row) => row.map(csvEscape).join(',')).join('\n')

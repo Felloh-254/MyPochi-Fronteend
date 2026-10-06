@@ -4,25 +4,22 @@ import { Bar } from 'vue-chartjs'
 import { formatPeriodShort } from '../../utils/period'
 
 const props = defineProps({
-  history: { type: Array, required: true }, // [{ period, budgeted, spent }]
+  history: { type: Array, required: true }, // [{ month, income, expense }]
 })
 
 const chartData = computed(() => ({
-  labels: props.history.map((h) => formatPeriodShort(h.period)),
+  labels: props.history.map((h) => formatPeriodShort(h.month)),
   datasets: [
     {
-      label: 'Budgeted',
-      data: props.history.map((h) => h.budgeted),
-      backgroundColor: '#E4E1FC',
+      label: 'Income',
+      data: props.history.map((h) => h.income),
+      backgroundColor: '#E4F9EC',
       borderRadius: 4,
     },
     {
-      label: 'Spent',
-      data: props.history.map((h) => h.spent),
-      backgroundColor: (ctx) => {
-        const h = props.history[ctx.dataIndex]
-        return h && h.spent > h.budgeted ? '#F0576B' : '#7C6FEE'
-      },
+      label: 'Expenses',
+      data: props.history.map((h) => h.expense),
+      backgroundColor: '#7C6FEE',
       borderRadius: 4,
     },
   ],

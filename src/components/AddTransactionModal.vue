@@ -34,6 +34,7 @@ function emptyForm() {
     type: '',
     title: '',
     amount: null,
+    transaction_cost: null,
     category: '',
     account_id: accountsStore.items[0]?.id ?? null,
     from_account_id: accountsStore.items[0]?.id ?? null,
@@ -97,6 +98,7 @@ async function submit() {
           type: 'transfer',
           title: form.title,
           amount: Number(form.amount),
+          transaction_cost: Number(form.transaction_cost || 0),
           from_account_id: form.from_account_id,
           to_account_id: form.to_account_id,
           date: form.date,
@@ -106,6 +108,7 @@ async function submit() {
           type: form.type,
           title: form.title,
           amount: Number(form.amount),
+          ...(form.type === 'expense' && { transaction_cost: Number(form.transaction_cost || 0) }),
           category: form.category,
           account_id: form.account_id,
           date: form.date,
@@ -261,6 +264,26 @@ async function submit() {
           </div>
         </div>
 
+        <div v-if="form.tab === 'transfer' || form.type === 'expense'" class="field transaction-cost-field">
+          <label for="transaction-cost">Transaction cost <span>Optional</span></label>
+          <div class="amount-input-wrap">
+            <span class="currency-prefix">{{ amountCurrency }}</span>
+            <input
+              id="transaction-cost"
+              v-model.number="form.transaction_cost"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              inputmode="decimal"
+              aria-describedby="transaction-cost-hint"
+            />
+          </div>
+          <p id="transaction-cost-hint" class="field-hint">
+            Deducted from this account in addition to the amount.
+          </p>
+        </div>
+
         <div class="field note-field">
           <label for="transaction-note">Note <span>Optional</span></label>
           <input id="transaction-note" v-model="form.note" placeholder="Add a detail you may want later" />
@@ -381,6 +404,8 @@ async function submit() {
 .currency-prefix { padding-left: 13px; color: var(--text-soft); font-size: 12px; font-weight: 700; }
 .amount-input-wrap input { width: 100%; min-width: 0; border: 0; background: transparent; box-shadow: none !important; font-size: 17px; font-weight: 650; font-variant-numeric: tabular-nums; }
 .amount-input-wrap input:focus { outline: none; }
+.transaction-cost-field { margin-top: 1px; }
+.field-hint { color: var(--text-faint); font-size: 11px; line-height: 1.4; }
 .note-field { margin-top: 2px; margin-bottom: 0; }
 .field-error { margin-top: 12px; padding: 10px 12px; border: 1px solid #f7d1d7; border-radius: 9px; background: #fff7f8; color: #bf344a; font-size: 12px; }
 .modal-actions { margin-top: 21px; padding-top: 18px; }

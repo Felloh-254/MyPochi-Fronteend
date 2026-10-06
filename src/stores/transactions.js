@@ -28,8 +28,12 @@ export const useTransactionsStore = defineStore('transactions', {
     totalExpenses: (state) => {
       const items = Array.isArray(state.items) ? state.items : []
       return items
-        .filter((t) => t.type === 'expense')
-        .reduce((s, t) => s + (t.amount || 0), 0)
+        .reduce((total, t) => {
+          const transactionCost = Number(t.transaction_cost) || 0
+          if (t.type === 'expense') return total + (Number(t.amount) || 0) + transactionCost
+          if (t.type === 'transfer') return total + transactionCost
+          return total
+        }, 0)
     },
     balance() {
       return this.totalIncome - this.totalExpenses
@@ -50,26 +54,23 @@ export const useTransactionsStore = defineStore('transactions', {
               ? payload.transactions
               : []
 
-        // Transform each transaction to ensure it has the required fields for UI display
+        // Normalize transaction details and list items for consistent display.
         items = items.map((t) => {
-          // If this is a full TransactionDetail response (with entries), enrich with convenience fields
-          if (t.entries && Array.isArray(t.entries) && t.entries.length > 0) {
-            return {
-              ...t,
-              account_id: t.entries[0].account_id,
-              amount: Math.abs(t.entries[0].amount || 0),
-              category: t.categories && t.categories.length > 0 ? t.categories[0].name : '',
-            }
-          }
-          // If this is a basic transaction (from /api/transactions list),
-          // ensure it has the fields the UI expects, using fallback values
+          const transaction = t.transaction ?? t
+          const entries = t.entries ?? transaction.entries ?? []
+          const categories = t.categories ?? transaction.categories ?? []
           return {
             ...t,
-            account_id: t.account_id ?? null,
-            amount: t.amount ?? 0,
-            category: t.category ?? '',
-            entries: t.entries || [],
-            categories: t.categories || [],
+            ...transaction,
+            account_id: transaction.account_id
+              ?? transaction.from_account_id
+              ?? entries[0]?.account_id
+              ?? null,
+            amount: transaction.amount ?? t.amount ?? Math.abs(entries[0]?.amount ?? 0),
+            transaction_cost: Number(transaction.transaction_cost ?? t.transaction_cost) || 0,
+            category: transaction.category ?? categories[0]?.name ?? '',
+            entries,
+            categories,
           }
         })
 
@@ -117,12 +118,21 @@ export const useTransactionsStore = defineStore('transactions', {
           throw new ApiError('Unknown transaction type', 400)
         }
 
-        // Enrich the response with convenience fields for UI compatibility
+        const transaction = created.transaction ?? created
+        const entries = created.entries ?? transaction.entries ?? []
+        const categories = created.categories ?? transaction.categories ?? []
         const enriched = {
           ...created,
-          account_id: created.entries?.[0]?.account_id ?? null,
-          amount: Math.abs(created.entries?.[0]?.amount ?? 0),
-          category: created.categories && created.categories.length > 0 ? created.categories[0].name : '',
+          ...transaction,
+          account_id: transaction.account_id
+            ?? transaction.from_account_id
+            ?? entries[0]?.account_id
+            ?? null,
+          amount: transaction.amount ?? Math.abs(entries[0]?.amount ?? 0),
+          transaction_cost: Number(transaction.transaction_cost) || 0,
+          category: transaction.category ?? categories[0]?.name ?? '',
+          entries,
+          categories,
         }
 
         this.items.unshift(enriched)

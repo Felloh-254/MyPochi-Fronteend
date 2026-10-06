@@ -74,7 +74,7 @@ function handleDelete(id) {
     <div class="card chart-enter-active">
       <div class="card-head">
         <h3>Monthly comparison</h3>
-        <span class="eyebrow">Budgeted vs. spent, last 6 months</span>
+        <span class="eyebrow">Income vs. expenses, last 6 months</span>
       </div>
       <BudgetComparisonChart :history="summaryStore.monthlyData" />
     </div>

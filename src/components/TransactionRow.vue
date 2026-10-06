@@ -28,6 +28,9 @@ const categoryDisplay = () => {
     <td v-if="showNote" class="txn-date">{{ transaction.note || '—' }}</td>
     <td class="txn-amt mono" :class="transaction.type === 'income' ? 'positive' : 'negative'">
       {{ transaction.type === 'income' ? '+' : '−' }}{{ formatCurrency(transaction.amount) }}
+      <span v-if="Number(transaction.transaction_cost) > 0" class="txn-cost">
+        +{{ formatCurrency(transaction.transaction_cost) }} fee
+      </span>
     </td>
   </tr>
 </template>
@@ -56,6 +59,14 @@ const categoryDisplay = () => {
 }
 .txn-amt.negative {
   color: var(--rose);
+}
+.txn-cost {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-faint);
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
 }
 .txn-date {
   color: var(--text-soft);
