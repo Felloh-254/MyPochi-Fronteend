@@ -75,12 +75,6 @@ The Vue frontend has been successfully updated to match the new transaction API 
 - Updated search filter to handle nullable category: `(t.category || '').toLowerCase()`
 - All other view logic unchanged
 
-### 6. **src/services/demoData.js**
-**Changes:**
-- Added sample transfer transaction demonstrating the new feature
-- Transaction ID 13: "Transfer to savings" between two accounts
-- Demo data remains backward compatible with old format
-
 ## Data Structure Compatibility
 
 ### Transaction Enrichment Strategy

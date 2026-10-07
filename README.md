@@ -38,7 +38,6 @@ src/
     goals.js, summary.js, notifications.js, ui.js
   services/
     api.js                 fetch wrapper — the only place that knows API routes
-    demoData.js              fallback data shown if the API is unreachable
     chartSetup.js             Chart.js component registration
   components/              cards, rows, modals, Icon set, charts/
   views/                   Dashboard, Accounts, Budgets, Recurring, Goals,
@@ -56,10 +55,11 @@ npm install
 npm run dev
 ```
 
-If the API can't be reached, every store falls back to realistic demo
-data automatically (`services/demoData.js`) so the UI is never just
-broken — a small banner says so wherever it applies. Login/registration
-still require the real API.
+The app does not include or generate sample account, transaction, budget,
+recurring, or goal records. It loads those records from the configured API.
+When a data request fails, the affected store is cleared and the error is
+shown; the app does not switch to dummy data. Login and registration also
+require the API.
 
 ## Build
 

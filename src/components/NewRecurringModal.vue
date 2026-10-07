@@ -28,7 +28,7 @@ function emptyForm() {
 
 const form = reactive(emptyForm())
 const submitting = computed(() => recurringStore.loading)
-const error = computed(() => (recurringStore.error && !recurringStore.isDemo ? recurringStore.error : null))
+const error = computed(() => recurringStore.error)
 
 function close() {
   ui.recurringModalOpen = false

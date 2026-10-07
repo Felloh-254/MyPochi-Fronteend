@@ -20,7 +20,7 @@ function emptyForm() {
 
 const form = reactive(emptyForm())
 const submitting = computed(() => budgetsStore.loading)
-const error = computed(() => (budgetsStore.error && !budgetsStore.isDemo ? budgetsStore.error : null))
+const error = computed(() => budgetsStore.error)
 
 function close() {
   ui.budgetModalOpen = false

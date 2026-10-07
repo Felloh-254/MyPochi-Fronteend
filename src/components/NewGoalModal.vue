@@ -20,7 +20,7 @@ function emptyForm() {
 
 const form = reactive(emptyForm())
 const submitting = computed(() => goalsStore.loading)
-const error = computed(() => (goalsStore.error && !goalsStore.isDemo ? goalsStore.error : null))
+const error = computed(() => goalsStore.error)
 
 function close() {
   ui.goalModalOpen = false

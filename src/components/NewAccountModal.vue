@@ -47,7 +47,7 @@ const form = reactive(emptyForm(props.account))
 const editing = computed(() => Boolean(props.account))
 const modalTitle = computed(() => (editing.value ? 'Edit account' : 'New account'))
 const submitting = computed(() => accountsStore.loading)
-const error = computed(() => (accountsStore.error && !accountsStore.isDemo ? accountsStore.error : null))
+const error = computed(() => accountsStore.error)
 const currencyQuery = ref('')
 const currencyOpen = ref(false)
 const filteredCurrencies = computed(() => {

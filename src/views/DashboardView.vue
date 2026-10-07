@@ -169,18 +169,6 @@ function accountName(accountId) {
   max-width: 100%;
   overflow-x: auto;
 }
-.demo-banner {
-  background: #fff7e6;
-  border: 1px solid #f5d99a;
-  color: #8a6420;
-  font-size: 12.5px;
-  padding: 10px 14px;
-  border-radius: 9px;
-}
-.demo-banner code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11.5px;
-}
 .hero-row {
   display: grid;
   grid-template-columns: 1.3fr 1fr 1fr;

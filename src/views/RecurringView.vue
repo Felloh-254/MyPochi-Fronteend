@@ -75,12 +75,4 @@ function accountName(accountId) {
   gap: 22px;
   max-width: 1180px;
 }
-.demo-banner {
-  background: #fff7e6;
-  border: 1px solid #f5d99a;
-  color: #8a6420;
-  font-size: 12.5px;
-  padding: 10px 14px;
-  border-radius: 9px;
-}
 </style>
